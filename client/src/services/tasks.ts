@@ -1,0 +1,126 @@
+import { createAsyncThunk, createEntityAdapter, createSlice, configureStore } from '@reduxjs/toolkit'
+import axios from 'axios'
+import store, { AppThunk } from './store'
+
+import { Task } from '../Types'
+
+interface TaskUpdate {
+  id:     number,
+  changes: Partial<Task>
+}
+
+interface TasksResponse {
+  data: Task[]
+}
+
+interface TasksState {
+  tasks: Task[],
+  error: string | null | undefined
+}
+
+// this only works if the id is stored in Task.id, otherwise specify with selectId
+
+const tasksAdapter = createEntityAdapter<Task>();
+
+// read this, dumbass!  your imperative ass needs to do everything immutably and
+// copy evvereyyythiingngng instead of "pointer math"-ing your way
+
+// https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns
+
+// still don't fully understand why i have to put all these in extraReducers anyway.
+
+export const fetchTasks = createAsyncThunk< Task[], void, {state: TasksState}>(
+  'tasks/fetchTasksStatus',
+  async(_, ThunkAPI) => {
+    const res = await axios.get< Task[] >('/api/task')
+    //console.log('axios response: ' + JSON.stringify(res))
+    return res.data
+  }
+)
+
+export const createTask = createAsyncThunk<Task, Task, {state: TasksState}>(
+  'tasks/createTaskStatus',
+  async(task, ThunkAPI) => {
+    // doing this to circumvent what seems to be a bug in Axios itself as of 0.23.0
+    const response: any = await axios.post('/api/task', task);
+    console.log('res: ' + JSON.stringify(response))
+    //return task;
+    return response.data.task;
+  }
+);
+
+export const updateTask = createAsyncThunk<TaskUpdate, TaskUpdate, {state: TasksState} >(
+  'tasks/updateTaskStatus',
+  async ( updatedTask, ThunkAPI ) => {
+    const response = await axios.put(`/api/task/${updatedTask.id}`, updatedTask);
+    return updatedTask;
+  }
+)
+
+export const removeTask = createAsyncThunk<number, number, { state: TasksState}> (
+  'tasks/removeTaskStatus',
+  async ( taskId, ThunkAPI ) => {
+    const response = await axios.delete(`/api/task/${taskId}`);
+    return taskId;
+  }
+)
+
+export const tasksSlice = createSlice({
+  name: 'tasks',
+  initialState: tasksAdapter.getInitialState(), 
+
+  // https://redux-toolkit.js.org/api/createEntityAdapter
+
+  reducers: { },
+  extraReducers: (builder) => {
+    builder.addCase(fetchTasks.fulfilled, (state, action) => {
+      // https://redux-toolkit.js.org/usage/usage-guide#managing-normalized-data
+      //
+      // typescript kinda sucks fucknig ass
+      // who are these type annotations helping?!  gtfo my way
+      // cool now im annotating "any" for both args to get this to compile.  bruh
+      const byId = action.payload.reduce( (byId: any, task: any) => {
+        byId[task.id] = task
+        return byId
+      }, {})
+
+      console.log('byId: ' + JSON.stringify(byId))
+      //state.entities = byId
+      //state.ids = Object.keys(byId)
+      //
+      //tasksAdapter.addMany( state, byId );
+      tasksAdapter.setAll( state, byId );
+    });
+    builder.addCase(createTask.fulfilled, (state, action) => {
+      tasksAdapter.addOne(state, action.payload);
+      console.log('hit this after addone')
+    }); 
+    builder.addCase(updateTask.fulfilled, (state, action) => {
+      tasksAdapter.updateOne(state, action.payload);
+    }); 
+    builder.addCase(removeTask.fulfilled, (state, action) => {
+      tasksAdapter.removeOne(state, action.payload);
+    }); 
+  }
+
+});
+
+/*
+const getTaskById = createAsyncThunk(
+  'tasks/getTaskByIdStatus',
+  async ( taskId ) => {
+    const response = await axios.get(`/api/tasks/${taskId}`);
+    return response;
+  }
+)
+*/
+
+type RootState = ReturnType<typeof store.getState>
+
+export const tasksSelectors = tasksAdapter.getSelectors<RootState>(
+  (state) => state.tasks
+)
+
+export const selectTasks = (state: RootState) => state.tasks
+
+export default tasksSlice.reducer

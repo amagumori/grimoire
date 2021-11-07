@@ -1,0 +1,47 @@
+
+
+@-webkit-keyframes breathing {
+0% {
+  opacity: 0.2;
+}
+
+25% {
+  opacity: 1;
+}
+
+60% {
+  opacity: 0.3;
+}
+
+100% {
+  opacity: 1;
+}
+}
+
+@keyframes breathing {
+0% {
+  opacity: 0.4;
+}
+
+20% {
+  opacity: 0.9;
+}
+
+55% {
+  opacity: 0.4;
+}
+
+70% {
+  opacity: 0.8;
+}
+
+100% {
+  opacity: 0.4;
+}
+}
+
+.breathe { 
+  animation: breathing 4s ease-in-out infinite normal;
+  -webkit-animation: breathing 4s ease-in-out infinite normal;
+}
+
