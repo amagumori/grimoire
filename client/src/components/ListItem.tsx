@@ -1,5 +1,5 @@
 import React, { useState, FunctionComponent } from 'react';
-import { Task, Project } from '../Types'
+import { Task, Project, Log } from '../Types'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 //import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,9 +8,31 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import store from '../services/store'
 import { Sector } from '../Types'
 
-type ItemProps = Task | Project
+type TaskProps = Task
+type ProjectProps = Project 
+type LogProps = Log 
 
-export const ListItem: FunctionComponent<ItemProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
+export const TaskItem: FunctionComponent<TaskProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
+  
+  return (
+    <div className="taskEntry" key={ id } >
+      <div className="task-date"> { timestamp } </div>
+      <div className="task-name"> { description } </div>
+    </div>
+  ) 
+}
+
+export const LogItem: FunctionComponent<LogProps> = ( {id, description, timestamp, timeSpent, sector, projectId, taskId } ) => {
+  
+  return (
+    <div className="taskEntry" key={ id } >
+      <div className="task-date"> { timestamp } </div>
+      <div className="task-name"> { description } </div>
+    </div>
+  ) 
+}
+
+export const ProjectItem: FunctionComponent<ProjectProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
   
   return (
     <div className="taskEntry" key={ id } >
@@ -41,4 +63,3 @@ const SectorIcon = ( sector: Sector ) => {
 
 }
 
-export default ListItem

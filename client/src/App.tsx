@@ -30,7 +30,7 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <div className="app">
-        <List listType="tasks" tasks={store.getState().tasks}/>
+        <List listType="logs" tasks={store.getState().tasks} logs={store.getState().logs}/>
         <CLI hidden={false}/>
         <TimeBar logs={store.getState().logs}/>
       </div>

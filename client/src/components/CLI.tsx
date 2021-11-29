@@ -30,6 +30,11 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
       if (e.key == 'Escape') {
         toggleCli(state => !state)
       }
+      // semicolon
+      if (e.key == ';' ) {
+        toggleCli(state => !state)
+      }
+
     }
     window.addEventListener('keyup', onKeyup);
   }, []) // empty array should mean only on component mount / unmount

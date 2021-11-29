@@ -28,7 +28,7 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "watch": "tsc-watch",
+    "watch": "tsc -w",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
