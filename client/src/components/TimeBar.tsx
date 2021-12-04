@@ -52,6 +52,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     let unloggedWidthPercentage = 0
     let nextLog = logs[index+1]
     let prevLog = logs[index-1]
+
+    let colorValue = Math.floor( Math.random() * 255 )
+
     if ( nextLog != undefined && prevLog != undefined ) {
       let nextStamp = Date.parse(nextLog.timestamp)
       let currStamp = Date.parse(log.timestamp)
@@ -73,7 +76,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         let logWidth = { width: `${loggedWidthPercentage}%` }
         let logPush  = { left: `${push}%` }
 
-        let logCSS = { width: `${loggedWidthPercentage}%`, left: `${push}%` }
+        let logCSS = { width: `${loggedWidthPercentage}%`, left: `${push}%`, "background-color": `rgba(255, 255, 255, ${colorValue}` }
   //let unloggedWidth = { width: `${unloggedWidthPercentage}%` }
         console.log('timespan in ms: ' + timespan )
         console.log('unlogged time: ' + unloggedTimeMs )
@@ -87,7 +90,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       }
     } else {
       let loggedWidthPercentage = ( ( log.timeSpent * 1000 * 60 ) / timespan ) * 100 
-      let logCSS = { width: `${loggedWidthPercentage}%` }
+      let logCSS = { width: `${loggedWidthPercentage}%`, "background-color": `rgba(255,255,255, ${colorValue}` }
 
       return (
           <div key={log.id} className="timebar-entry" style={ logCSS }></div>

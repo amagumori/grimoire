@@ -291,10 +291,22 @@ h1 {
 }
 
 .cli-input {
+  display: inline-block;
   height: 1.5em;
   background: rgba(50, 64, 82, 0.5);
+  border-bottom: 2px solid #fff;
   padding: 0.5em;
-  width: 100%;
+  max-width: 100%;
+  animation: fade 0.75s ease-in-out;
+}
+
+.log-button {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+  border-radius: 2px;
+  padding: 0.5em;
+  background: rgba(50, 64, 82, 0.7);
   animation: fade 0.75s ease-in-out;
 }
 
@@ -377,7 +389,6 @@ input {
   font-feature-settings: case;
   background-color: transparent;
   border: none;
-  width: 100%;
 }
 
 .input-small {

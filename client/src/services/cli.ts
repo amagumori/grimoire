@@ -15,6 +15,7 @@ interface TasksResponse {
 
 interface CLIState {
   hidden: boolean,
+  logForm: boolean,
   commands: CLICommand[],
   error: string | null | undefined
 }
@@ -28,6 +29,10 @@ export const cliSlice = createSlice({
   reducers: { 
     toggleCLI: ( state: CLIState ) => {
       state.hidden = !state.hidden
+    },
+    enableLog: ( state: CLIState ) => {
+      state.logForm = true
+      console.log('reducer state: ' + state.logForm)
     }
   },
   extraReducers: {}
@@ -64,6 +69,6 @@ type RootState = ReturnType<typeof store.getState>
 const { actions, reducer } = cliSlice;
 
 // export each action (reducer) by name
-export const { toggleCLI } = actions;
+export const { toggleCLI, enableLog } = actions;
 
 export default reducer;

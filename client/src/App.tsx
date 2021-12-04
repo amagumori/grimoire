@@ -35,7 +35,7 @@ const App: React.FC = () => {
     <Provider store={store}>
       <div className="app">
         <List listType="logs" tasks={store.getState().tasks} logs={store.getState().logs}/>
-        <CLI hidden={false}/>
+        <CLI />
         <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} logs={store.getState().logs}/>
       </div>
     </Provider>
