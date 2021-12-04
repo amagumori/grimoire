@@ -38,7 +38,7 @@
   overflow: hidden;
   text-align: center;
   white-space: nowrap;
-  background-color: #038dee;
+  background-color: #ff0000;
 }
 
 .fi {
@@ -91,6 +91,23 @@ li {
   grid-auto-rows: min-content;
 
   height: 100vh;
+}
+
+.test-timebar-container {
+  margin-left: 25%;
+  margin-right: 25%;
+  display: grid;
+ 
+  grid-template-areas: 
+    "head head head head head head head head"
+    "entry entry entry entry entry entry entry entry" 
+    "footer footer footer footer footer footer footer footer"; 
+
+  height: 100vh;
+
+  grid-auto-rows: min-content;
+  grid-auto-columns: 1fr;
+
 }
 
 .new-list-container {

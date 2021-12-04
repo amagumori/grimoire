@@ -7,6 +7,9 @@ import { fetchLogs, selectLogs, logsSelectors } from '../services/logs'
 import store from '../services/store'
 
 interface TimeBarProps {
+  startTime: Date
+  endTime: Date
+
   logs: EntityState<Log>
 }
 
@@ -108,8 +111,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   return (
     // "divs" goes in the timeabr
-    <div className="timebar">
-      {todayDivs}
+    <div className="test-timebar-container">
+      <div className="timebar">
+        {todayDivs}
+      </div>
     </div>
   )
 
