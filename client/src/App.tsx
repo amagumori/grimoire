@@ -27,12 +27,16 @@ type currentPage =
 
 const App: React.FC = () => {
 
+  const threeDaysAgo = 86400 * 1000 * 10
+  const defaultTimebarEnd = new Date( Date.now() )
+  const defaultTimebarStart = new Date( Date.now() - threeDaysAgo )
+
   return (
     <Provider store={store}>
       <div className="app">
         <List listType="logs" tasks={store.getState().tasks} logs={store.getState().logs}/>
         <CLI hidden={false}/>
-        <TimeBar logs={store.getState().logs}/>
+        <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} logs={store.getState().logs}/>
       </div>
     </Provider>
   )

@@ -98,11 +98,6 @@ li {
   margin-right: 25%;
   display: grid;
  
-  grid-template-areas: 
-    "head head head head head head head head"
-    "entry entry entry entry entry entry entry entry" 
-    "footer footer footer footer footer footer footer footer"; 
-
   height: 100vh;
 
   grid-auto-rows: min-content;

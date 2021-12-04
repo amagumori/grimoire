@@ -42,23 +42,13 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     dispatch(fetchLogs())
   }, [dispatch, logs])
 
-  const dayInMs = 86400 * 1000
-  const twentyFourHoursAgo = Date.now() - dayInMs
-
-  const startDate = new Date( "2021-11-20T00:00:00+0000" )
-
-  const today = new Date().getTime() 
-  //const yesterday = new Date(today.getDate() - 1)
-  const yesterday = today - dayInMs
-  const now = Date.now()
-
-  const dateDiff  = now - startDate.getTime()
+  const timespan = props.endTime.getTime() - props.startTime.getTime()
 
   const theLogs = logsSelectors.selectAll(store.getState())
 
   let push = 0
 
-  const todayDivs = theLogs.map( ( log: any, index: number, logs: any ) => {
+  const divs = theLogs.map( ( log: any, index: number, logs: any ) => {
     let unloggedWidthPercentage = 0
     let nextLog = logs[index+1]
     let prevLog = logs[index-1]
@@ -66,18 +56,17 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       let nextStamp = Date.parse(nextLog.timestamp)
       let currStamp = Date.parse(log.timestamp)
       let prevStamp = Date.parse(prevLog.timestamp)
+
       let timeSpentMs = log.timeSpent * 1000 * 60   // timeSpent is in MINUTES!!!
       let prevTimeSpent = prevLog.timeSpent * 1000 * 60
 
-      if ( currStamp > yesterday ) {
+      if ( currStamp > props.startTime.getTime() ) {
 
         //let unloggedTimeMs = nextStamp - ( currStamp + ( timeSpentMs ) )
         let unloggedTimeMs = currStamp - ( prevStamp + prevTimeSpent )
-        unloggedWidthPercentage = (unloggedTimeMs / dayInMs) * 100 
-        let prevLoggedWidth = ( prevTimeSpent / dayInMs ) * 100
-        let loggedWidthPercentage = (timeSpentMs / dayInMs) * 100 
-
-        
+        unloggedWidthPercentage = (unloggedTimeMs / timespan ) * 100 
+        let prevLoggedWidth = ( prevTimeSpent / timespan ) * 100
+        let loggedWidthPercentage = (timeSpentMs / timespan ) * 100 
 
         push = loggedWidthPercentage + unloggedWidthPercentage
 
@@ -86,7 +75,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
         let logCSS = { width: `${loggedWidthPercentage}%`, left: `${push}%` }
   //let unloggedWidth = { width: `${unloggedWidthPercentage}%` }
-        console.log('day in ms: ' + dayInMs)
+        console.log('timespan in ms: ' + timespan )
         console.log('unlogged time: ' + unloggedTimeMs )
         console.log('unlogged width \%: ' + unloggedWidthPercentage)
         console.log('logged width \%: ' + loggedWidthPercentage)
@@ -97,7 +86,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         )
       }
     } else {
-      let loggedWidthPercentage = ( ( log.timeSpent * 1000 ) / dayInMs) * 100 
+      let loggedWidthPercentage = ( ( log.timeSpent * 1000 * 60 ) / timespan ) * 100 
       let logCSS = { width: `${loggedWidthPercentage}%` }
 
       return (
@@ -113,7 +102,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     // "divs" goes in the timeabr
     <div className="test-timebar-container">
       <div className="timebar">
-        {todayDivs}
+        {divs}
       </div>
     </div>
   )
@@ -125,46 +114,5 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     return logsArray
   }, {})
   */
-  const divs = theLogs.map( (log: any, index: number, logs: any) => {
-    let nextLog = logs[index+1]
-    let unloggedWidth = 0
-    if ( nextLog ) {
-      // i'm starting to feel the need for MASSIVE PRECISION, OVERFLOW, AND OTHER ISSUES
-      console.log('nextlog is true.')
-      let nextStamp = Date.parse(nextLog.timestamp)
-      let currStamp = Date.parse(log.timestamp)
-      let timeSpentMs = log.timeSpent * 1000
-      // timeSpent - minutes!
-      let unloggedTimeDifference = nextStamp - ( currStamp + ( timeSpentMs ) )
-      //console.log('unloggedTimeDifference: ' + unloggedTimeDifference)
-      unloggedWidth = unloggedTimeDifference / dateDiff 
-      unloggedWidth *= 100
-      //console.log('unlogged width: ' + unloggedWidth)
-     
-    // 1440min / day
-    //
-    // when doing this "rendering all logs" version - need to calculate exact pixel width off actual pixel width of the timebar.
-    // use index to peek next log and get time difference to generate unlogged div.
-      let percentageWidth = timeSpentMs / dateDiff
-      percentageWidth *= 100
-
-      //console.log('percentageWidth: ' + percentageWidth)
-
-    let logWidth = { width: `${percentageWidth}%` }
-    let unlogWidth = { width: `${unloggedWidth}%` }
-
-    return (
-      <div>
-        <div key={log.id} className="timebar-entry" style={ logWidth }></div>
-        { 
-          unloggedWidth > 0 &&
-          <div className="timebar-unlogged" style={ unlogWidth }></div>
-        } 
-      </div>
-    )
-
-    }
-    // so this does eerything but the last one
-  })
       
 }
