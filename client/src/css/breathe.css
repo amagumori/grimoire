@@ -28,7 +28,7 @@
 }
 
 55% {
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 70% {
@@ -41,7 +41,7 @@
 }
 
 .breathe { 
-  animation: breathing 4s ease-in-out infinite normal;
-  -webkit-animation: breathing 4s ease-in-out infinite normal;
+  animation: breathing 2s ease-in-out infinite normal;
+  -webkit-animation: breathing 2s ease-in-out infinite normal;
 }
 

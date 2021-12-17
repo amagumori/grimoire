@@ -1,10 +1,11 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { createRef, PureComponent, FunctionComponent, useEffect, useState } from 'react';
 import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
 
 import { fetchLogs, selectLogs, logsSelectors } from '../services/logs'
 import store from '../services/store'
+import DraggableComponent from './Draggable'
 
 interface TimeBarProps {
   startTime: Date
@@ -30,11 +31,29 @@ interface TimeBarProps {
 //type MaybeLog = Log | undefined
 //const peek: LogPeek = ( next: Log | undefined ) => return next ?? undefined
 
+const throttleUpdates = ( f: Function ) => {
+  // just fighting the type system to get this to run first
+  let token: any = null, lastArgs: any = null;
+  const invoke = () => {
+    f(...lastArgs)
+    token = null
+  }
+  const res = (...args: any ) => {
+    lastArgs = args
+    if ( !token ) {
+      token = requestAnimationFrame(invoke)
+    }
+  }
+  res.cancel = () => token && cancelAnimationFrame(token)
+  return res
+}
+
 export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const dispatch = useDispatch()
 
   const [logs, updateLogs] = useState(0)
+  const [position, move] = useState( { x: 0, y: 0 } )
 
   const useLogsSelector = useSelector(selectLogs)
 
@@ -104,6 +123,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   return (
     // "divs" goes in the timeabr
     <div className="test-timebar-container">
+      <DraggableComponent />
       <div className="timebar">
         {divs}
       </div>

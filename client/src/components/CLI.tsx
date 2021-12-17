@@ -19,7 +19,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const onChange = (e) => {
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
 
     if ( inputValue == "log" ) {
@@ -62,7 +62,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     //logIcn = <i class=
   }
   return(
-    <div className="cli-wrapper">
+    <div className="cli-wrapper breathe">
       {logBtn}
       <input value={inputValue} className={ hidden == true ? "cli-input hidden" : "cli-input" } onChange={onChange}></input>
     </div>
