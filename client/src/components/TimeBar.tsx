@@ -1,4 +1,4 @@
-import React, { createRef, PureComponent, FunctionComponent, useEffect, useState } from 'react';
+import React, { createRef, useRef, PureComponent, FunctionComponent, useEffect, useState } from 'react';
 import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
@@ -48,8 +48,15 @@ const throttleUpdates = ( f: Function ) => {
   return res
 }
 
+interface Dimensions {
+  width: Number,
+  xOffset: Number
+}
+
 export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
+  const timebarRef: React.RefObject<HTMLDivElement>  = useRef(null)
+ 
   const dispatch = useDispatch()
 
   const [logs, updateLogs] = useState(0)
@@ -57,8 +64,15 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const useLogsSelector = useSelector(selectLogs)
 
+  const [width, setWidth] = useState(0)
+  const [offset, setOffset] = useState(0)
+
   useEffect( () => {
     dispatch(fetchLogs())
+    if ( timebarRef.current != null ) { 
+      setWidth(timebarRef.current.offsetWidth)
+      setOffset(timebarRef.current.offsetLeft)
+    }
   }, [dispatch, logs])
 
   const timespan = props.endTime.getTime() - props.startTime.getTime()
@@ -123,9 +137,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   return (
     // "divs" goes in the timeabr
     <div className="test-timebar-container">
-      <Draggable test="foo" />
-      <div className="timebar">
+      
+      <div className="timebar" ref={timebarRef} >
         {divs}
+          <Draggable parentWidth={ width } parentX={ offset } timespan={ timespan } />
       </div>
     </div>
   )

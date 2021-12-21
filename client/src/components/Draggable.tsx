@@ -12,60 +12,57 @@ type DraggableProps = {
 }
 
 type DummyProps = { 
-  test: String
+  parentWidth: number,
+  parentX: number,
+  timespan: number
 }
 
 type DraggableState = {
-  relX: number,
-  x: number 
+  x: number,
+  timeStamp: number
 }
-
 
 class Draggable extends React.Component<DummyProps, DraggableState> {
 
-    private divRef: React.RefObject<HTMLDivElement>
+  private divRef: React.RefObject<HTMLDivElement>
 
-    constructor( props: DummyProps) { 
-      super(props)
-      this.divRef = React.createRef()
-      this.onMouseDown = this.onMouseDown.bind(this);
-      this.onMouseMove = this.onMouseMove.bind(this);
-      this.onMouseUp = this.onMouseUp.bind(this);
-      
-    }
+  constructor( props: DummyProps) { 
+    super(props)
+    this.divRef = React.createRef()
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+    this.setState({ x: props.parentX })
 
-    state: DraggableState = { 
-      relX: 0,
-      x: 0
-    };
+    console.log('bb' + this.state.x) 
+  }
 
-  /*
-    constructor(props: DraggableProps ) {
-        super(props);
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
-        this.onTouchStart = this.onTouchStart.bind(this);
-        this.onTouchMove = this.onTouchMove.bind(this);
-        this.onTouchEnd = this.onTouchEnd.bind(this);
-    }
-   */
+  state: DraggableState = { 
+    timeStamp: 0,
+    x: this.props.parentX
+  }
 
   onStart(e: React.MouseEvent<HTMLDivElement>) {
     const body = document.body;
-    if ( this.divRef.current != null ) {
+    if ( this.divRef.current != null ) { 
       const box = this.divRef.current.getBoundingClientRect();
+      console.log("passed width: " + this.props.parentWidth )
+      console.log("passed offset: " + this.props.parentX )
+
       this.setState({
-        relX: e.pageX - (box.left + body.scrollLeft - body.clientLeft)
+        x: box.left
+        //relX: e.pageX - (box.left + body.scrollLeft - body.clientLeft)
       })
     };
   }
 
   onMove(e: MouseEvent ) {
-        const x = Math.trunc((e.pageX - this.state.relX))
+      var x = Math.trunc(e.pageX) 
+      if ( x > this.props.parentWidth + this.props.parentX ) x = this.props.parentWidth + this.props.parentX
+      if ( x < this.props.parentX ) x = this.props.parentX
         if (x !== this.state.x ) { 
             this.setState({
-                x
+                x: x 
             });
           //this.props.onMove && this.props.onMove(this.state.x)
         }        
@@ -128,3 +125,9 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
 }
 
 export default Draggable;
+
+  /*
+export default React.forwardRef( (props: DummyProps, ref: React.MutableRefObject) => {
+  <Draggable { ...props } innerRef={ref} />
+})
+   */
