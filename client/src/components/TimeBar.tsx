@@ -5,7 +5,7 @@ import { EntityState } from '@reduxjs/toolkit'
 
 import { fetchLogs, selectLogs, logsSelectors } from '../services/logs'
 import store from '../services/store'
-import DraggableComponent from './Draggable'
+import Draggable from './Draggable'
 
 interface TimeBarProps {
   startTime: Date
@@ -123,7 +123,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   return (
     // "divs" goes in the timeabr
     <div className="test-timebar-container">
-      <DraggableComponent />
+      <Draggable test="foo" />
       <div className="timebar">
         {divs}
       </div>
