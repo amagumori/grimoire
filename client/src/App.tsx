@@ -31,11 +31,13 @@ const App: React.FC = () => {
   const defaultTimebarEnd = new Date( Date.now() )
   const defaultTimebarStart = new Date( Date.now() - threeDaysAgo )
 
+  console.table( store.getState().logs ) 
+
   return (
     <Provider store={store}>
       <div className="app">
         <List listType="logs" tasks={store.getState().tasks} logs={store.getState().logs}/>
-        <CLI />
+        <CLI logs={store.getState().logs}/>
         <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} logs={store.getState().logs}/>
       </div>
     </Provider>
