@@ -48,11 +48,6 @@ const throttleUpdates = ( f: Function ) => {
   return res
 }
 
-interface Dimensions {
-  width: Number,
-  xOffset: Number
-}
-
 export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const timebarRef: React.RefObject<HTMLDivElement>  = useRef(null)
@@ -61,6 +56,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const [logs, updateLogs] = useState(0)
   const [position, move] = useState( { x: 0, y: 0 } )
+  const [loaded, setLoaded] = useState(false)
 
   const useLogsSelector = useSelector(selectLogs)
 
@@ -69,6 +65,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   useEffect( () => {
     dispatch(fetchLogs())
+    setLoaded(true)
     if ( timebarRef.current != null ) { 
       setWidth(timebarRef.current.offsetWidth)
       setOffset(timebarRef.current.offsetLeft)
@@ -76,6 +73,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   }, [dispatch, logs])
 
   const timespan = props.endTime.getTime() - props.startTime.getTime()
+
+  console.log('timespan: ' + timespan)
 
   const theLogs = logsSelectors.selectAll(store.getState())
 
@@ -140,7 +139,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       
       <div className="timebar" ref={timebarRef} >
         {divs}
+          { loaded ? 
           <Draggable parentWidth={ width } parentX={ offset } timespan={ timespan } />
+          : "loading" }
       </div>
     </div>
   )

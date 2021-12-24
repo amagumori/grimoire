@@ -27,9 +27,9 @@ type currentPage =
 
 const App: React.FC = () => {
 
-  const threeDaysAgo = 86400 * 1000 * 10
+  const tenDaysAgo = 86400 * 1000 * 10
   const defaultTimebarEnd = new Date( Date.now() )
-  const defaultTimebarStart = new Date( Date.now() - threeDaysAgo )
+  const defaultTimebarStart = new Date( Date.now() - tenDaysAgo )
 
   return (
     <Provider store={store}>
