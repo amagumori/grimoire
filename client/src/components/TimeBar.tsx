@@ -123,7 +123,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       }
     } else {
       let loggedWidthPercentage = ( ( log.timeSpent * 1000 * 60 ) / timespan ) * 100 
-      let logCSS = { width: `${loggedWidthPercentage}%`, "background-color": `rgba(255,255,255, ${colorValue}` }
+      let logCSS = { width: `${loggedWidthPercentage}%`, "background-color": `rgba(255,${colorValue}, 255, ${colorValue}` }
 
       return (
           <div key={log.id} className="timebar-entry" style={ logCSS }></div>
