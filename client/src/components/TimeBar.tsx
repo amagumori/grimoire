@@ -79,7 +79,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const theLogs = logsSelectors.selectAll(store.getState())
 
   let push = 0
-
+  
+  // now this is just ugly.
   const divs = theLogs.map( ( log: any, index: number, logs: any ) => {
     let unloggedWidthPercentage = 0
     let nextLog = logs[index+1]
