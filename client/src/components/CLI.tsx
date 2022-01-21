@@ -1,12 +1,13 @@
 import React, { FunctionComponent, useEffect, useState, useRef } from 'react';
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Hint } from './Hint'
 import { Log } from '../Types'
 import { EntityState } from '@reduxjs/toolkit'
+import store from '../services/store'
 import '../css/breathe.css'
 import { HiTerminal,  HiCode } from 'react-icons/hi'
 import { IoColorPaletteSharp } from 'react-icons/io5'
-//import { toggleCLI } from '../services/cli'
+import { selectLogs, logsSelectors } from '../services/logs'
 
 interface CLIProps {
   logs: EntityState<Log>
@@ -26,7 +27,19 @@ const sectorHints = [
 
 export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
-  const lastLogDate =
+  //  const sortedLogs = useSelector(selectLogs).selectAll(store.getState())
+  //
+  const sortedLogs = logsSelectors.selectAll( store.getState() ) 
+
+  console.log(sortedLogs)
+
+  sortedLogs.sort( (a, b) => {
+    console.log('a: ' + a.timestamp)
+    console.log('b: ' + b.timestamp)
+    if ( a.timestamp > b.timestamp ) return 1
+    if ( a.timestamp < b.timestamp ) return -1
+    return 0
+  })
 
   const [logActive, toggleLog] = useState(false)
   const [sector, setSector] = useState("")
@@ -39,15 +52,18 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
   let logIcon: any
   let logBtn
 
-  let month = props.lastLogDate.getMonth().toString()
-  let day = props.lastLogDate.getDay().toString()
+    /*
+  let lastLogDate = sortedLogs[0].timestamp
+
+  let month = lastLogDate.getMonth().toString()
+  let day = lastLogDate.getDay().toString()
 
   let str = month + "/" + day 
 
-  let monthDate = ` ${props.lastLogDate.getMonth()} / ${props.lastLogDate.getDay()} `
+  let monthDate = ` ${lastLogDate.getMonth()} / ${lastLogDate.getDay()} `
 
-  let time = props.lastLogDate.toLocaleTimeString('en-US')
-
+  let time = lastLogDate.toLocaleTimeString('en-US')
+     */
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
 

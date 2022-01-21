@@ -54,6 +54,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
  
   const dispatch = useDispatch()
 
+  // accepts a locale string
+  const [time, updateTime] = useState<string>("");
   const [logs, updateLogs] = useState(0)
   const [position, move] = useState( { x: 0, y: 0 } )
   const [loaded, setLoaded] = useState(false)
@@ -141,9 +143,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       <div className="timebar" ref={timebarRef} >
         {divs}
           { loaded ? 
-          <Draggable parentWidth={ width } parentX={ offset } timespan={ timespan } />
+          <Draggable updateTime={ updateTime } parentWidth={ width } parentX={ offset } timespan={ timespan } />
           : "loading" }
       </div>
+      <div className="clock"> { time } </div>
     </div>
   )
 
@@ -156,3 +159,4 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   */
       
 }
+

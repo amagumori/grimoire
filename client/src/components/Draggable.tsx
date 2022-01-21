@@ -14,7 +14,8 @@ type DraggableProps = {
 type DummyProps = { 
   parentWidth: number,
   parentX: number,
-  timespan: number
+  timespan: number,
+  updateTime: Function
 }
 
 type DraggableState = {
@@ -76,6 +77,9 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     console.log('time offset: ' + timeOffset)
     let time = new Date( this.state.timestamp.getTime() + timeOffset )
     console.log('time: ' + time.toLocaleString('en-US'))
+    let timeString = time.toLocaleString('en-US')
+
+    this.props.updateTime( timeString );
 
     if (x !== this.state.x ) { 
       this.setState({

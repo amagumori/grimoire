@@ -1,4 +1,4 @@
-import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createEntityAdapter, createSlice, createSelector } from '@reduxjs/toolkit';
 import axios from 'axios';
 import store, { AppThunk } from './store'
 import { Log } from '../Types'
@@ -115,4 +115,22 @@ export const logsSelectors = logsAdapter.getSelectors<RootState>(
 
 export const selectLogs = (state: RootState) => state.logs
 
+/*
+export const sortLogsByDateDescending = createSelector( (state: RootState) => {
+  let dumbWay = []
+
+  // entity | id: T
+  for ( const val in state.logs.entities ) {
+    console.log(val)
+    dumbWay.push(val)
+  }
+
+  dumbWay.sort( (a, b) => {
+  if ( a.timestamp > b.timestamp ) return 1
+  if ( a.timestamp < b.timestamp ) return -1
+  return 0
+  })
+}, result => result
+)
+*/
 export default logsSlice.reducer
