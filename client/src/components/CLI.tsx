@@ -11,6 +11,7 @@ import { selectLogs, logsSelectors } from '../services/logs'
 
 interface CLIProps {
   logs: EntityState<Log>
+  updateOffset: Function
 }
 
 const sectorHints = [
@@ -26,12 +27,15 @@ const sectorHints = [
 
 
 export const CLI: FunctionComponent<CLIProps> = ( props ) => {
+  
+  const inputRef = useRef<HTMLInputElement>(null)
+  const timeSpentRef = useRef<HTMLInputElement>(null)
 
   //  const sortedLogs = useSelector(selectLogs).selectAll(store.getState())
   //
   const sortedLogs = logsSelectors.selectAll( store.getState() ) 
 
-  console.log(sortedLogs)
+  //console.log(sortedLogs)
 
   sortedLogs.sort( (a, b) => {
     console.log('a: ' + a.timestamp)
@@ -43,6 +47,9 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   const [logActive, toggleLog] = useState(false)
   const [sector, setSector] = useState("")
+  const [sectorDisabled, toggleSector] = useState(false)
+  const [timeSpentDisabled, toggleTimeSpent] = useState(true)
+  const [timeSpent, setTimeSpent] = useState(0)
   const [hidden, toggleCli] = useState(false);
   const [inputValue, setInputValue] = useState("")
   const [hintDict, setHintDict] = useState(sectorHints)
@@ -74,25 +81,44 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   }
 
+  const onTimeChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setTimeSpent( parseInt( e.target.value ) )
+  }
+
+  const onTimeSubmit = ( e: React.KeyboardEvent ) => {
+
+    if (e.key == ' ' || e.key == 'Enter' || e.key == "Space" ) {
+      let value = timeSpent * 60000
+      props.updateOffset(value)
+
+    }
+
+  }
+
   const handleFill = ( word: String | Object | undefined ) => {
     switch ( word ) {
       case "programming":
         setSector("programming")
-        setInputValue("")
+        toggleSector(true)
+        toggleTimeSpent(false)
         break;
       case "visual":
         setSector("visual")
         setInputValue("")
+        toggleSector(true)
+        toggleTimeSpent(false)
         break;
       default:
         setSector("none")
+        toggleSector(false)
         break;
     }
   }
   
 
-  const inputRef = useRef<HTMLInputElement>(null)
-  let firstInput = <input value={inputValue} ref={inputRef} className={ hidden == true ? "cli-input hidden" : "cli-input" } onChange={onChange}></input>
+  
+
+  let firstInput = <input ref={inputRef} className={ hidden == true ? "cli-input hidden" : "cli-input" } onChange={onChange}></input>
 
   let currentInput = firstInput 
 
@@ -118,34 +144,40 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
           console.log('semi')
           toggleCli(true)
         }
-
-        // delete icon on empty input and delete pressed
-      if ( e.key == 'Backspace' ) {
+        
+        /*
+        if ( e.key == 'Backspace' ) {
           console.log("input value: " + inputValue)
           console.log("key: " + e.key)
-        console.log("we reached here")
+          console.log("we reached here")
           if ( inputValue == "" && e.key == "Backspace" ) {
-            setSector("none")
+            toggleSectorSet(false);
           }
         }
+         */
       }
     window.addEventListener('keyup', onKeyup);
   }, []) // empty array should mean only on component mount / unmount
 
   if ( logActive == true ) {
     logBtn = <div className="log-button">LOG</div>
-    currentInput = (
-      <Hint options={sectorHints} disableHint={hintsDisabled} allowTabFill onFill={handleFill} >
-        <input className="cli-input" ref={inputRef}></input>
-      </Hint>
+      currentInput = (
+        <div className={ sectorDisabled == true ? "sector-input-wrapper hidden" : "sector-input-wrapper" } >
+          <Hint options={sectorHints} disableHint={hintsDisabled} allowTabFill onFill={handleFill} >
+            <input className={ sectorDisabled == true ? "hidden cli-input" : "cli-input" } value={inputValue} onChange={onChange} ref={inputRef}></input>
+          </Hint>
+        </div>
     )
   }
 
   switch ( sector ) {
     case "programming":
-      console.log('reached')
+    //console.log('reached')
       let css = { "font-size": "14px" }
       logIcon = ( <HiTerminal className="input-icon" /> )
+      if ( null !== timeSpentRef.current ) {
+        timeSpentRef.current.focus()
+      }
       break;
     case "visual":
       console.log('peached')
@@ -160,10 +192,14 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
 
   return(
-    <div className="cli-wrapper breathe">
+    <div className="new-cli-wrapper breathe">
       {logBtn}
       {logIcon}
       {currentInput}
+      <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
+        time spent:
+        <input className="time-spent" ref={timeSpentRef} onChange={ onTimeChange } onKeyUp={ onTimeSubmit }></input>
+      </div>
     </div>
   )
 }

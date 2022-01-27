@@ -5,6 +5,9 @@
   width: 50%;
   display: inline-block;
 }
+.app {
+
+} 
 
 .placeholder {
   display: inline-block;
@@ -128,6 +131,8 @@ li {
 .test-timebar-container {
   margin-left: 25%;
   margin-right: 25%;
+  margin-top: 25%;
+  margin-bottom: 25%;
   display: grid;
  
   height: 100vh;
@@ -317,15 +322,34 @@ h1 {
   color: #f8e8f8;
 }
 
+.new-cli-wrapper {
+  width: 100%;
+  color: #f8e8f8;
+  white-space: nowrap;
+}
+
+.sector-input-wrapper {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.time-spent-wrapper {
+  display: inline-block;
+}
+
+.time-spent {
+
+}
+
 .hidden {
-  visibility: hidden;
+  display: none;
+  /* visibility: hidden; */
 }
 
 .cli-input {
   display: inline-block;
-  height: 1.5em;
+  height: 0.5em;
   background: rgba(50, 64, 82, 0.5);
-  border-bottom: 2px solid #fff;
   padding: 0.5em;
   max-width: 100%;
   animation: fade 0.75s ease-in-out;
@@ -334,7 +358,6 @@ h1 {
 .log-button {
   position: relative;
   display: inline-block;
-  height: 100%;
   border-radius: 2px;
   padding: 0.5em;
   background: rgba(50, 64, 82, 0.7);

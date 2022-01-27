@@ -44,6 +44,12 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     console.log('time ratio: ' + this.timeRatio)
   }
 
+  componentDidMount() {
+    this.setState( { 
+      x: this.props.parentX
+    })
+  }
+
   state: DraggableState = { 
     timestamp: new Date(Date.now() - this.props.timespan),
     x: this.props.parentX
@@ -134,6 +140,7 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
             className="gg-pin-alt"
             onMouseDown={this.onMouseDown}
             style={{
+                color: "#eee",
                 position: 'absolute',
                 left: this.state.x,
                 touchAction: 'none'

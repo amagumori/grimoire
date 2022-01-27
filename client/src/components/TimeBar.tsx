@@ -6,6 +6,7 @@ import { EntityState } from '@reduxjs/toolkit'
 import { fetchLogs, selectLogs, logsSelectors } from '../services/logs'
 import store from '../services/store'
 import Draggable from './Draggable'
+import { CLI } from './CLI'
 
 interface TimeBarProps {
   startTime: Date
@@ -64,17 +65,28 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const [width, setWidth] = useState(0)
   const [offset, setOffset] = useState(0)
+  const [timeOffset, setTimeOffset] = useState(0) // ms
+
+  const timespan = props.endTime.getTime() - props.startTime.getTime()
+
+  var ratio = 0
 
   useEffect( () => {
     dispatch(fetchLogs())
     setLoaded(true)
     if ( timebarRef.current != null ) { 
       setWidth(timebarRef.current.offsetWidth)
-      setOffset(timebarRef.current.offsetLeft)
+      let deltaT = 0;
+      if ( timeOffset > 0 ) {
+        ratio = width / timespan
+        deltaT = timeOffset * ratio
+        console.log("deltaT: " + deltaT);
+        console.log("reached here.")
+      }
+      setOffset(timebarRef.current.offsetLeft + deltaT )
     }
   }, [dispatch, logs])
 
-  const timespan = props.endTime.getTime() - props.startTime.getTime()
 
   console.log('timespan: ' + timespan)
 
@@ -137,9 +149,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   })
 
   return (
-    // "divs" goes in the timeabr
-    <div className="test-timebar-container">
-      
+    <div className="timebar-wrapper">
+      <div> { ratio } </div>
+      <div> { timespan} </div>
+      <CLI logs={store.getState().logs} updateOffset={ setTimeOffset } ></CLI>
       <div className="timebar" ref={timebarRef} >
         {divs}
           { loaded ? 
