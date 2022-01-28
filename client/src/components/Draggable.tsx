@@ -11,7 +11,8 @@ type DraggableProps = {
   gridY: Number
 }
 
-type DummyProps = { 
+type DummyProps = {
+  classString: string,
   parentWidth: number,
   parentX: number,
   timespan: number,
@@ -78,11 +79,11 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     if ( x < this.props.parentX ) x = this.props.parentX
 
     let xOffset = x - this.props.parentX
-    console.log('xof' + xOffset)
+    //console.log('xof' + xOffset)
     let timeOffset = Math.trunc( xOffset * this.timeRatio )
-    console.log('time offset: ' + timeOffset)
+    //console.log('time offset: ' + timeOffset)
     let time = new Date( this.state.timestamp.getTime() + timeOffset )
-    console.log('time: ' + time.toLocaleString('en-US'))
+    //console.log('time: ' + time.toLocaleString('en-US'))
     let timeString = time.toLocaleString('en-US')
 
     this.props.updateTime( timeString );
@@ -137,7 +138,7 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
 
     render() {
         return <div
-            className="gg-pin-alt"
+            className={this.props.classString}
             onMouseDown={this.onMouseDown}
             style={{
                 color: "#eee",

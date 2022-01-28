@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const defaultTimebarEnd = new Date( Date.now() )
   const defaultTimebarStart = new Date( Date.now() - tenDaysAgo )
 
-  console.table( store.getState().logs ) 
+  //console.table( store.getState().logs ) 
   
   //<List listType="logs" tasks={store.getState().tasks} logs={store.getState().logs}/>
   //

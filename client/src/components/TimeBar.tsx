@@ -79,7 +79,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       let deltaT = 0;
       if ( timeOffset > 0 ) {
         ratio = width / timespan
-        deltaT = timeOffset * ratio
+        deltaT = timeOffset / ratio
         console.log("deltaT: " + deltaT);
         console.log("reached here.")
       }
@@ -88,12 +88,19 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   }, [dispatch, logs])
 
 
-  console.log('timespan: ' + timespan)
+  //console.log('timespan: ' + timespan)
 
   const theLogs = logsSelectors.selectAll(store.getState())
 
   let push = 0
-  
+
+  const playheadUpdater = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    console.log("ebent hanbler: " + e.target.value)
+    let val = parseInt( e.target.value )
+    setOffset( val )
+  }
+
+
   // now this is just ugly.
   const divs = theLogs.map( ( log: any, index: number, logs: any ) => {
     let unloggedWidthPercentage = 0
@@ -148,16 +155,23 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
  
   })
 
+  const startArrow = "gg-pin-alt"
+  const endArrow = "CgArrowDown"
+
   return (
     <div className="timebar-wrapper">
       <div> { ratio } </div>
       <div> { timespan} </div>
-      <CLI logs={store.getState().logs} updateOffset={ setTimeOffset } ></CLI>
+      <CLI logs={store.getState().logs} playheadPos={ offset } playheadUpdate={ playheadUpdater } ></CLI>
       <div className="timebar" ref={timebarRef} >
         {divs}
-          { loaded ? 
-          <Draggable updateTime={ updateTime } parentWidth={ width } parentX={ offset } timespan={ timespan } />
-          : "loading" }
+          { loaded ?
+          <Draggable classString={ startArrow } updateTime={ updateTime } parentWidth={ width } parentX={ offset } timespan={ timespan } />
+        : "loading" }
+
+        { loaded ? 
+        <Draggable classString={ endArrow } updateTime={ updateTime } parentWidth={ width } parentX={ offset } timespan={ timespan } />
+        : "loading" } 
       </div>
       <div className="clock"> { time } </div>
     </div>

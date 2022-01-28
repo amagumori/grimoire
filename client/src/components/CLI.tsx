@@ -11,7 +11,8 @@ import { selectLogs, logsSelectors } from '../services/logs'
 
 interface CLIProps {
   logs: EntityState<Log>
-  updateOffset: Function
+  playheadPos: number
+  playheadUpdate: React.ChangeEventHandler<HTMLInputElement>
 }
 
 const sectorHints = [
@@ -85,6 +86,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     setTimeSpent( parseInt( e.target.value ) )
   }
 
+    /*
   const onTimeSubmit = ( e: React.KeyboardEvent ) => {
 
     if (e.key == ' ' || e.key == 'Enter' || e.key == "Space" ) {
@@ -94,6 +96,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     }
 
   }
+     */
 
   const handleFill = ( word: String | Object | undefined ) => {
     switch ( word ) {
@@ -175,9 +178,6 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     //console.log('reached')
       let css = { "font-size": "14px" }
       logIcon = ( <HiTerminal className="input-icon" /> )
-      if ( null !== timeSpentRef.current ) {
-        timeSpentRef.current.focus()
-      }
       break;
     case "visual":
       console.log('peached')
@@ -198,7 +198,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
       {currentInput}
       <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
         time spent:
-        <input className="time-spent" ref={timeSpentRef} onChange={ onTimeChange } onKeyUp={ onTimeSubmit }></input>
+        <input className="time-spent" ref={timeSpentRef} onSubmit={ props.playheadUpdate } ></input>
       </div>
     </div>
   )
