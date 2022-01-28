@@ -65,6 +65,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const [width, setWidth] = useState(0)
   const [offset, setOffset] = useState(0)
+  const [endPlayheadPos, setEndPlayhead] = useState(0)
   const [timeOffset, setTimeOffset] = useState(0) // ms
 
   const timespan = props.endTime.getTime() - props.startTime.getTime()
@@ -76,14 +77,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     setLoaded(true)
     if ( timebarRef.current != null ) { 
       setWidth(timebarRef.current.offsetWidth)
-      let deltaT = 0;
-      if ( timeOffset > 0 ) {
-        ratio = width / timespan
-        deltaT = timeOffset / ratio
-        console.log("deltaT: " + deltaT);
-        console.log("reached here.")
-      }
-      setOffset(timebarRef.current.offsetLeft + deltaT )
+      setOffset(timebarRef.current.offsetLeft)
     }
   }, [dispatch, logs])
 
@@ -96,8 +90,17 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const playheadUpdater = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     console.log("ebent hanbler: " + e.target.value)
-    let val = parseInt( e.target.value )
-    setOffset( val )
+    let val = parseInt( e.target.value ) * 60000
+    console.log("width: " + width)
+    console.log("ratio: " + (width / timespan))
+    console.log("delta: " + ( val * ratio  ))
+    let deltaT = 0;
+    if ( val > 0 ) {
+      ratio = width / timespan
+      deltaT = val * ratio
+      console.log("deltaT: " + deltaT)
+    }
+    setEndPlayhead( Math.trunc(deltaT) )
   }
 
 
@@ -156,21 +159,21 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   })
 
   const startArrow = "gg-pin-alt"
-  const endArrow = "CgArrowDown"
+  const endArrow = "gg-arrow-down"
 
   return (
     <div className="timebar-wrapper">
       <div> { ratio } </div>
       <div> { timespan} </div>
-      <CLI logs={store.getState().logs} playheadPos={ offset } playheadUpdate={ playheadUpdater } ></CLI>
+      <CLI logs={store.getState().logs} playheadPos={ offset } endPlayheadPos = { endPlayheadPos } playheadUpdate={ playheadUpdater } ></CLI>
       <div className="timebar" ref={timebarRef} >
         {divs}
           { loaded ?
-          <Draggable classString={ startArrow } updateTime={ updateTime } parentWidth={ width } parentX={ offset } timespan={ timespan } />
+          <Draggable classString={ startArrow } updateTime={ updateTime } parentOffset={ 0 } parentWidth={ width } parentX={ offset } timespan={ timespan } />
         : "loading" }
 
         { loaded ? 
-        <Draggable classString={ endArrow } updateTime={ updateTime } parentWidth={ width } parentX={ offset } timespan={ timespan } />
+        <Draggable classString={ endArrow } updateTime={ updateTime } parentOffset={ endPlayheadPos } parentWidth={ width } parentX={ offset } timespan={ timespan } />
         : "loading" } 
       </div>
       <div className="clock"> { time } </div>

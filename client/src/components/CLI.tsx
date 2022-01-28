@@ -12,6 +12,7 @@ import { selectLogs, logsSelectors } from '../services/logs'
 interface CLIProps {
   logs: EntityState<Log>
   playheadPos: number
+  endPlayheadPos: number
   playheadUpdate: React.ChangeEventHandler<HTMLInputElement>
 }
 
@@ -31,6 +32,8 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
   
   const inputRef = useRef<HTMLInputElement>(null)
   const timeSpentRef = useRef<HTMLInputElement>(null)
+
+  const updateFunc = props.playheadUpdate;
 
   //  const sortedLogs = useSelector(selectLogs).selectAll(store.getState())
   //
@@ -198,7 +201,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
       {currentInput}
       <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
         time spent:
-        <input className="time-spent" ref={timeSpentRef} onSubmit={ props.playheadUpdate } ></input>
+        <input className="time-spent" ref={timeSpentRef} onChange={ updateFunc } ></input>
       </div>
     </div>
   )

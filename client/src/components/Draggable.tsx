@@ -15,6 +15,7 @@ type DummyProps = {
   classString: string,
   parentWidth: number,
   parentX: number,
+  parentOffset: number,
   timespan: number,
   updateTime: Function
 }
@@ -37,18 +38,26 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     this.onMouseUp = this.onMouseUp.bind(this);
     this.setState( { x: this.props.parentX, timestamp: new Date(Date.now() - this.props.timespan ) })
 
-    console.log('effective time: ' + new Date( Date.now() - this.props.timespan ) )
+    //console.log('effective time: ' + new Date( Date.now() - this.props.timespan ) )
 
     // timespan comes in in ms - this gives ms per pixel
     this.timeRatio = this.props.timespan / this.props.parentWidth
     
-    console.log('time ratio: ' + this.timeRatio)
+    //console.log('time ratio: ' + this.timeRatio)
   }
 
   componentDidMount() {
     this.setState( { 
-      x: this.props.parentX
+      x: this.props.parentX 
     })
+  }
+
+  componentDidUpdate( prevProps: DummyProps ) {
+    if ( prevProps.parentOffset !== this.props.parentOffset ) {
+      this.setState({
+        x: this.props.parentX + this.props.parentOffset
+      })
+    }
   }
 
   state: DraggableState = { 

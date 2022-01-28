@@ -32,6 +32,12 @@
   }
 }
 
+.gg-arrow-down {
+  position: relative;
+  margin-bottom: 1em;
+  transition: left 0.75s;
+}
+
 .gg-pin-alt {
     box-sizing: border-box;
     position: relative;
