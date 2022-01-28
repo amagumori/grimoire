@@ -84,7 +84,16 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   //console.log('timespan: ' + timespan)
 
+  //const theLogs = store.getState().logs
   const theLogs = logsSelectors.selectAll(store.getState())
+
+  var relevantLogs : Log[] = []
+  for ( const [k, v] of Object.entries(theLogs) ) {
+    if ( v.timestamp > props.startTime && v.timestamp < props.endTime ) {
+      relevantLogs.push(v)
+      console.log("relevant log: " + JSON.stringify(v))
+    }
+  }
 
   let push = 0
 
@@ -102,7 +111,54 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     }
     setEndPlayhead( Math.trunc(deltaT) )
   }
+  
+  const divs24h = theLogs.map( (log: any, index: number, logs: any ) => {
+    let unloggedWidthPercentage = 0
+    let nextLog = logs[index+1]
+    let prevLog = logs[index-1]
 
+    let colorValue = Math.floor( Math.random() * 255 )
+
+    if ( nextLog != undefined && prevLog != undefined ) {
+
+      let timeSpentMs = log.timeSpent * 60000
+      let prevTimeSpent = prevLog.timeSpent * 60000
+
+      if ( log.timestamp > props.startTime ) {
+
+        let nextStamp = Date.parse(nextLog.timestamp)
+        let currStamp = Date.parse(log.timestamp)
+        let prevStamp = Date.parse(prevLog.timestamp)
+
+        let unloggedTimeMs = currStamp - ( prevStamp + prevTimeSpent )
+        unloggedWidthPercentage = (unloggedTimeMs / timespan ) * 100 
+        let prevLoggedWidth = ( prevTimeSpent / timespan ) * 100
+        let loggedWidthPercentage = (timeSpentMs / timespan ) * 100 
+
+        push = loggedWidthPercentage + unloggedWidthPercentage
+        
+        let logCSS = { 
+          width: loggedWidthPercentage, 
+          left: push,
+          backgroundColor: `rgba(255, 255, 255, ${colorValue}`
+        }
+
+        return ( <TimeBarEntry id={log.id} log={log} css={logCSS} /> )
+
+      } else {
+
+        let loggedWidthPercentage = ( ( log.timeSpent * 60000 ) / timespan ) * 100
+
+        let logCSS = { 
+          width: loggedWidthPercentage, 
+          left: push,
+          backgroundColor: `rgba(0, 255, 255, ${colorValue}`
+        }
+
+        return ( <TimeBarEntry id={log.id} log={log} css={logCSS} /> )
+      }
+    }
+  })
 
   // now this is just ugly.
   const divs = theLogs.map( ( log: any, index: number, logs: any ) => {
@@ -122,7 +178,6 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
       if ( currStamp > props.startTime.getTime() ) {
 
-        //let unloggedTimeMs = nextStamp - ( currStamp + ( timeSpentMs ) )
         let unloggedTimeMs = currStamp - ( prevStamp + prevTimeSpent )
         unloggedWidthPercentage = (unloggedTimeMs / timespan ) * 100 
         let prevLoggedWidth = ( prevTimeSpent / timespan ) * 100
@@ -134,11 +189,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         let logPush  = { left: `${push}%` }
 
         let logCSS = { width: `${loggedWidthPercentage}%`, left: `${push}%`, "background-color": `rgba(255, 255, 255, ${colorValue}` }
-  //let unloggedWidth = { width: `${unloggedWidthPercentage}%` }
-        console.log('timespan in ms: ' + timespan )
-        console.log('unlogged time: ' + unloggedTimeMs )
-        console.log('unlogged width \%: ' + unloggedWidthPercentage)
-        console.log('logged width \%: ' + loggedWidthPercentage)
+
+        //let unloggedWidth = { width: `${unloggedWidthPercentage}%` }
 
         return (
           <div key={log.id} className="timebar-entry" style={ logCSS }></div>
@@ -147,7 +199,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       }
     } else {
       let loggedWidthPercentage = ( ( log.timeSpent * 1000 * 60 ) / timespan ) * 100 
-      let logCSS = { width: `${loggedWidthPercentage}%`, "background-color": `rgba(255,${colorValue}, 255, ${colorValue}` }
+      let logCSS = { width: `${loggedWidthPercentage}%`, "background-color": `rgba(0,${colorValue}, 255, ${colorValue}` }
 
       return (
           <div key={log.id} className="timebar-entry" style={ logCSS }></div>
@@ -163,11 +215,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   return (
     <div className="timebar-wrapper">
-      <div> { ratio } </div>
-      <div> { timespan} </div>
-      <CLI logs={store.getState().logs} playheadPos={ offset } endPlayheadPos = { endPlayheadPos } playheadUpdate={ playheadUpdater } ></CLI>
+      <CLI logs={store.getState().logs} playheadPos={ offset } endPlayheadPos={ endPlayheadPos } playheadUpdate={ playheadUpdater } ></CLI>
       <div className="timebar" ref={timebarRef} >
-        {divs}
+        {divs24h}
           { loaded ?
           <Draggable classString={ startArrow } updateTime={ updateTime } parentOffset={ 0 } parentWidth={ width } parentX={ offset } timespan={ timespan } />
         : "loading" }
@@ -190,3 +240,15 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       
 }
 
+interface EntryProps {
+  id:  number
+  log: Log
+  css: React.CSSProperties
+}
+
+const TimeBarEntry: FunctionComponent<EntryProps> = ( props ) => {
+
+  return (
+    <div key={ props.id } className="timebar-entry" style={ props.css }></div>
+  )
+}

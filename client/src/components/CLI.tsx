@@ -41,6 +41,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   //console.log(sortedLogs)
 
+    /*
   sortedLogs.sort( (a, b) => {
     console.log('a: ' + a.timestamp)
     console.log('b: ' + b.timestamp)
@@ -48,6 +49,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     if ( a.timestamp < b.timestamp ) return -1
     return 0
   })
+     */
 
   const [logActive, toggleLog] = useState(false)
   const [sector, setSector] = useState("")
@@ -89,17 +91,9 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     setTimeSpent( parseInt( e.target.value ) )
   }
 
-    /*
-  const onTimeSubmit = ( e: React.KeyboardEvent ) => {
-
-    if (e.key == ' ' || e.key == 'Enter' || e.key == "Space" ) {
-      let value = timeSpent * 60000
-      props.updateOffset(value)
-
-    }
+  const onSubmit = ( e: React.SyntheticEvent ) => {
 
   }
-     */
 
   const handleFill = ( word: String | Object | undefined ) => {
     switch ( word ) {
@@ -196,13 +190,15 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   return(
     <div className="new-cli-wrapper breathe">
-      {logBtn}
-      {logIcon}
-      {currentInput}
-      <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
-        time spent:
-        <input className="time-spent" ref={timeSpentRef} onChange={ updateFunc } ></input>
-      </div>
+      <form onSubmit={ onSubmit } >
+        {logBtn}
+        {logIcon}
+        {currentInput}
+        <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
+          time spent:
+          <input className="time-spent" ref={timeSpentRef} onChange={ updateFunc } ></input>
+        </div>
+      </form>
     </div>
   )
 }

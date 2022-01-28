@@ -35,7 +35,7 @@
 .gg-arrow-down {
   position: relative;
   margin-bottom: 1em;
-  transition: left 0.75s;
+  transition: left 0.75s ease-in-out;
 }
 
 .gg-pin-alt {
@@ -45,6 +45,7 @@
     width: 2px;
     height: 8px;
     border-radius: 3px;
+    transition: left 0.1s ease-out;
     transform: scale(var(--ggs,1));
     background: currentColor
 }
@@ -70,6 +71,7 @@
 }
 
 .timebar-entry {
+  margin-bottom: 2px;
   border-radius: 2px;
   display: inline-block;
   width: 100%;
