@@ -16,7 +16,12 @@ interface LogUpdate {
 
 // this only works if the id is stored in Log.id, otherwise specify with selectId
 
-const logsAdapter = createEntityAdapter<Log>();
+//const logsAdapter = createEntityAdapter<Log>();
+const logsAdapter = createEntityAdapter<Log>({
+  // js at its finest right here.  because this is deserialized JSON
+  // they might appear to be Date objects and Date typed but don't have methods
+  sortComparer: (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+});
 
 // read this, dumbass!  your imperative ass needs to do everything immutably and
 // copy evvereyyythiingngng instead of "pointer math"-ing your way
@@ -112,6 +117,24 @@ type RootState = ReturnType<typeof store.getState>
 export const logsSelectors = logsAdapter.getSelectors<RootState>(
   (state) => state.logs
 )
+
+var allLogs = logsSelectors.selectAll
+
+/*
+export const select24h = createSelector( allLogs, logs => {
+  var now = new Date( Date.now() )
+  var then = new Date( Date.now() - 86400000 )
+  logs.map( (log) => {
+    let ts = new Date(log.timestamp)
+    if ( ts > then && ts < now ) return ts
+  })
+})
+
+export const selectLast = createSelector( logsSelectors.selectAll, logs => {
+  logs.sort( (a, b) => new Date( b.timestamp ).getTime() - new Date( a.timestamp ).getTime())
+  return logs[0]
+})
+*/
 
 export const selectLogs = (state: RootState) => state.logs
 

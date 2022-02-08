@@ -14,6 +14,7 @@ interface CLIProps {
   playheadPos: number
   endPlayheadPos: number
   playheadUpdate: React.ChangeEventHandler<HTMLInputElement>
+  togglePlayhead: React.FocusEventHandler<HTMLInputElement>
 }
 
 const sectorHints = [
@@ -196,7 +197,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
         {currentInput}
         <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
           time spent:
-          <input className="time-spent" ref={timeSpentRef} onChange={ updateFunc } ></input>
+          <input className="time-spent" ref={timeSpentRef} onChange={ updateFunc } onFocus={props.togglePlayhead} ></input>
         </div>
       </form>
     </div>

@@ -1,9 +1,11 @@
+/*
+
 import React, { createRef, useRef, PureComponent, FunctionComponent, useEffect, useState } from 'react';
 import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
 
-import { fetchLogs, selectLogs, logsSelectors } from '../services/logs'
+import { fetchLogs, selectLogs, logsSelectors, allLogs } from '../services/logs'
 import store from '../services/store'
 import Draggable from './Draggable'
 import { CLI } from './CLI'
@@ -12,25 +14,8 @@ interface TimeBarProps {
   startTime: Date
   endTime: Date
 
-  logs: EntityState<Log>
+  //logs: EntityState<Log>
 }
-
-// so the real thing i want to implement is going to be tricky.  an infinitely scrollable time bar of a fixed width.
-// the element widths should be calculated as a function of clientwidth, maybe.
-// 
-// the naive thing is just to literally render ALL divs.  i.e. render every single fucking log in the timebar.
-// honestly i think this is fine.  a year of entries, a couple thousand divs?  
-// what's the worst that could happen?
-// LOL
-//
-// so - render a flexbox with a div for every log, and then set scrollLeft to show the correct time range ( past 24h etc ) 
-//
-// i think what makes most sense is granular control over the timebar time span.
-// 24h / week / month / ytd / all ?
-
-// this is so dumb
-//type MaybeLog = Log | undefined
-//const peek: LogPeek = ( next: Log | undefined ) => return next ?? undefined
 
 const throttleUpdates = ( f: Function ) => {
   // just fighting the type system to get this to run first
@@ -57,11 +42,12 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   // accepts a locale string
   const [time, updateTime] = useState<string>("");
-  const [logs, updateLogs] = useState(0)
   const [position, move] = useState( { x: 0, y: 0 } )
   const [loaded, setLoaded] = useState(false)
-
-  const useLogsSelector = useSelector(selectLogs)
+  const [logs, updateLogs] = useState(0)
+  //  const useLogsSelector = useSelector(selectLogs)
+ 
+  const newLogs = useSelector(selectLogs)
 
   const [width, setWidth] = useState(0)
   const [offset, setOffset] = useState(0)
@@ -71,6 +57,17 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const timespan = props.endTime.getTime() - props.startTime.getTime()
 
   var ratio = 0
+
+    /*
+  useEffect( () => {
+    dispatch(fetchLogs())
+    setLoaded(true)
+    if ( timebarRef.current != null ) { 
+      setWidth(timebarRef.current.offsetWidth)
+      setOffset(timebarRef.current.offsetLeft)
+    }
+  }, [dispatch, logs])
+  
 
   useEffect( () => {
     dispatch(fetchLogs())
@@ -82,27 +79,12 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   }, [dispatch, logs])
 
 
-  //console.log('timespan: ' + timespan)
-
-  //const theLogs = store.getState().logs
   const theLogs = logsSelectors.selectAll(store.getState())
-
-  var relevantLogs : Log[] = []
-  for ( const [k, v] of Object.entries(theLogs) ) {
-    if ( v.timestamp > props.startTime && v.timestamp < props.endTime ) {
-      relevantLogs.push(v)
-      console.log("relevant log: " + JSON.stringify(v))
-    }
-  }
 
   let push = 0
 
   const playheadUpdater = ( e: React.ChangeEvent<HTMLInputElement> ) => {
-    console.log("ebent hanbler: " + e.target.value)
     let val = parseInt( e.target.value ) * 60000
-    console.log("width: " + width)
-    console.log("ratio: " + (width / timespan))
-    console.log("delta: " + ( val * ratio  ))
     let deltaT = 0;
     if ( val > 0 ) {
       ratio = width / timespan
@@ -112,7 +94,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     setEndPlayhead( Math.trunc(deltaT) )
   }
   
-  const divs24h = theLogs.map( (log: any, index: number, logs: any ) => {
+  const divs24h = newLogs.map( (log: any, index: number, logs: any ) => {
     let unloggedWidthPercentage = 0
     let nextLog = logs[index+1]
     let prevLog = logs[index-1]
@@ -143,7 +125,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
           backgroundColor: `rgba(255, 255, 255, ${colorValue}`
         }
 
-        return ( <TimeBarEntry id={log.id} log={log} css={logCSS} /> )
+        if ( log.timestamp > props.startTime && log.timestamp < props.endTime ) {
+          return ( <TimeBarEntry id={log.id} log={log} css={logCSS} /> )
+        }
 
       } else {
 
@@ -155,7 +139,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
           backgroundColor: `rgba(0, 255, 255, ${colorValue}`
         }
 
-        return ( <TimeBarEntry id={log.id} log={log} css={logCSS} /> )
+        if ( log.timestamp > props.startTime && log.timestamp < props.endTime ) {
+          return ( <TimeBarEntry id={log.id} log={log} css={logCSS} /> )
+        }
       }
     }
   })
@@ -211,7 +197,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   })
 
   const startArrow = "gg-pin-alt"
-  const endArrow = "gg-arrow-down"
+  const endArrow = "gg-arrow-down hidden"
 
   return (
     <div className="timebar-wrapper">
@@ -236,7 +222,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     logsArray[log.id] = log
     return logsArray
   }, {})
-  */
+// close comment here
       
 }
 
@@ -252,3 +238,5 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( props ) => {
     <div key={ props.id } className="timebar-entry" style={ props.css }></div>
   )
 }
+
+    */

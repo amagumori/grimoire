@@ -14,7 +14,7 @@ import './css/breathe.css';
 import store from './services/store'
 import { List } from './components/List'
 import { CLI } from './components/CLI'
-import { TimeBar } from './components/TimeBar'
+import { TimeBar } from './components/NewTimeBar'
 
 type currentPage =
   | {
@@ -41,7 +41,7 @@ const App: React.FC = () => {
       <div className="app">
         <List listType="tasks" tasks={store.getState().tasks} logs={store.getState().logs}/>
         <div className="test-timebar-container">
-          <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} logs={store.getState().logs}/>
+          <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} />
         </div>
       </div>
     </Provider>
