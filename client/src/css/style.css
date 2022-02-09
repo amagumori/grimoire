@@ -88,7 +88,11 @@
 }
 
 .timebar-entry:hover {
-  background-color: #0011ee;
+  background-color: #fff;
+}
+
+.log-date {
+  display: inline-block;
 }
 
 .fi {

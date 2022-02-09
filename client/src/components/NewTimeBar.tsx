@@ -23,6 +23,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   
   const [latestLogTimestamp, setLatestTimestamp] = useState<Date>()
 
+  const [currentLog, setCurrentLog] = useState<Log>()
+
   const [time, updateTime] = useState<string>("");
   const [loaded, setLoaded] = useState(false)
   const [logs, updateLogs] = useState(0)
@@ -40,14 +42,14 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   useEffect( () => {
     dispatch(fetchLogs())
     setLoaded(true)
+    let totalEntities = logsSelectors.selectTotal(store.getState())
+    let lastLog = logsSelectors.selectById(store.getState(), totalEntities - 1)
+    setCurrentLog( lastLog ) 
     if ( timebarRef.current != null ) { 
       setWidth(timebarRef.current.offsetWidth)
       setOffset(timebarRef.current.offsetLeft)
     }
   }, [dispatch, logs])
-
-  const totalEntities = logsSelectors.selectTotal(store.getState())
-  const lastLog = logsSelectors.selectById(store.getState(), totalEntities - 1)
 
   const theLogs = logsSelectors.selectAll(store.getState())
 
@@ -124,7 +126,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   return (
     <div className="timebar-wrapper">
-      <CLI logs={store.getState().logs} playheadPos={ offset } endPlayheadPos={ endPlayheadPos } playheadUpdate={ playheadUpdater } togglePlayhead={ setPlayheadVisible } ></CLI>
+      <CLI logs={store.getState().logs} currentTime={ time } playheadPos={ offset } endPlayheadPos={ endPlayheadPos } playheadUpdate={ playheadUpdater } togglePlayhead={ setPlayheadVisible } ></CLI>
       <div className="timebar" ref={timebarRef} >
         {divs24h}
           { loaded ?
@@ -137,6 +139,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         }
       </div>
       <div className="clock"> { time } </div>
+      { loaded && currentLog && currentLog.id != undefined ? 
+      <EntryView id={ currentLog.id } hidden={ false } log= { currentLog } />
+      : "loading" } 
     </div>
   )
 
@@ -156,3 +161,39 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( props ) => {
   )
 }
 
+interface EntryViewProps {
+  id: number
+  hidden: boolean
+  log: Log
+}
+
+const EntryView: FunctionComponent<EntryViewProps> = ( props ) => {
+
+  const [ hidden, toggleHidden ] = useState(false)
+
+  // OH MY GOD FIX THIS
+
+  var startTime = props.log.timestamp.toLocaleTimeString('en-US')
+  // uhhh
+  let end = props.log.timestamp.getTime()
+  var endTime = new Date( end + ( props.log.timeSpent * 60000 ) )
+  var endTimeString = endTime.toLocaleTimeString('en-US')
+
+  return (
+    <div>
+    { hidden ? 
+    <div key={ props.id } className="entry-view">
+      <div className="entry-time">{ startTime } - { endTimeString }</div>
+      <div className="sector">{ props.log.sector }</div>
+      <div className="entry-description">{props.log.description}</div>
+    </div> 
+    : 
+    <div key={ props.id } className="entry-view">
+      <div className="entry-time">{ startTime } - { endTimeString }</div>
+      <div className="sector">{ props.log.sector }</div>
+      <div className="entry-description">{props.log.description}</div>
+    </div> 
+    }
+    </div>
+  )
+}
