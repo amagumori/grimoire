@@ -1,5 +1,6 @@
 import { combineReducers, configureStore, Action } from '@reduxjs/toolkit'
 import { ThunkAction } from 'redux-thunk'
+import { useDispatch } from 'react-redux'
 import tasksReducer from './tasks'
 import logsReducer  from './logs'
 import projectsReducer from './projects'
@@ -19,6 +20,8 @@ const store = configureStore({
 })
 
 export type AppDispatch = typeof store.dispatch
+
+export const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>
 

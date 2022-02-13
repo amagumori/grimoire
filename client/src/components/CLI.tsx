@@ -54,7 +54,6 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
      */
 
   const [logActive, toggleLog] = useState(false)
-  const [logStartTime, setStartTime] = useState("")
   const [sector, setSector] = useState("")
   const [sectorDisabled, toggleSector] = useState(false)
   const [timeSpentDisabled, toggleTimeSpent] = useState(true)
@@ -67,8 +66,6 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   let logIcon: any
   let logBtn
-
-  let logTime = new Date( logStartTime ).toLocaleString('en-US')
 
     /*
   let lastLogDate = sortedLogs[0].timestamp
@@ -197,7 +194,7 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
     <div className="new-cli-wrapper breathe">
       <form onSubmit={ onSubmit } >
         {logBtn}
-        <div className="log-date">{ logTime }</div>
+        <div className="log-date">{ props.currentTime }</div>
         {logIcon}
         {currentInput}
         <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >

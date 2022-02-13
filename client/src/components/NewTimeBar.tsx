@@ -3,7 +3,7 @@ import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
 
-import { fetchLogs, selectLogs, logsSelectors } from '../services/logs'
+import { fetchLogs, selectLogs, logsSelectors, select24h } from '../services/logs'
 import store from '../services/store'
 import Draggable from './Draggable'
 import { CLI } from './CLI'
@@ -19,11 +19,16 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
  
   const dispatch = useDispatch()
 
+  const logCount = useSelector( logsSelectors.selectTotal )
+  const theLogs  = useSelector( logsSelectors.selectAll ) 
+
+  const last24Logs = useSelector( select24h ) 
+
   // accepts a locale string
   
   const [latestLogTimestamp, setLatestTimestamp] = useState<Date>()
 
-  const [currentLog, setCurrentLog] = useState<Log>()
+  const [currentLogId, setCurrentLogId] = useState(0)
 
   const [time, updateTime] = useState<string>("");
   const [loaded, setLoaded] = useState(false)
@@ -42,18 +47,12 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   useEffect( () => {
     dispatch(fetchLogs())
     setLoaded(true)
-    let totalEntities = logsSelectors.selectTotal(store.getState())
-    let lastLog = logsSelectors.selectById(store.getState(), totalEntities - 1)
-    setCurrentLog( lastLog ) 
     if ( timebarRef.current != null ) { 
       setWidth(timebarRef.current.offsetWidth)
       setOffset(timebarRef.current.offsetLeft)
     }
   }, [dispatch, logs])
 
-  const theLogs = logsSelectors.selectAll(store.getState())
-
-  let push = 0
 
   const playheadUpdater = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     let val = parseInt( e.target.value ) * 60000
@@ -70,7 +69,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       togglePlayhead(false)
   }
   
-  const divs24h = theLogs.map( (log: any, index: number, logs: any ) => {
+  let push = 0
+  const divs24h = last24Logs.map( (log: any, index: number, logs: any ) => {
     let unloggedWidthPercentage = 0
     let nextLog = logs[index+1]
     let prevLog = logs[index-1]
@@ -82,9 +82,15 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
       if ( log.timestamp > props.startTime ) {
 
-        let nextStamp = Date.parse(nextLog.timestamp)
-        let currStamp = Date.parse(log.timestamp)
-        let prevStamp = Date.parse(prevLog.timestamp)
+        let nextStamp = nextLog.timestamp.getTime()
+        let currStamp = log.timestamp.getTime()
+        let prevStamp = prevLog.timestamp.getTime()
+
+        let playheadTime = Date.parse( time ) 
+
+        if ( currStamp < playheadTime && ( currStamp + timeSpentMs ) > playheadTime ) {
+          setCurrentLogId( log.id );
+        }
 
         let unloggedTimeMs = currStamp - ( prevStamp + prevTimeSpent )
         unloggedWidthPercentage = (unloggedTimeMs / timespan ) * 100 
@@ -126,6 +132,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   return (
     <div className="timebar-wrapper">
+      <div>CURRENT LOG ID: { currentLogId }</div>
       <CLI logs={store.getState().logs} currentTime={ time } playheadPos={ offset } endPlayheadPos={ endPlayheadPos } playheadUpdate={ playheadUpdater } togglePlayhead={ setPlayheadVisible } ></CLI>
       <div className="timebar" ref={timebarRef} >
         {divs24h}
@@ -139,9 +146,6 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         }
       </div>
       <div className="clock"> { time } </div>
-      { loaded && currentLog && currentLog.id != undefined ? 
-      <EntryView id={ currentLog.id } hidden={ false } log= { currentLog } />
-      : "loading" } 
     </div>
   )
 

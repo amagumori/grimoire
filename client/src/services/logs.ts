@@ -120,13 +120,13 @@ export const logsSelectors = logsAdapter.getSelectors<RootState>(
 
 var allLogs = logsSelectors.selectAll
 
-/*
+
 export const select24h = createSelector( allLogs, logs => {
   var now = new Date( Date.now() )
   var then = new Date( Date.now() - 86400000 )
   logs.map( (log) => {
     let ts = new Date(log.timestamp)
-    if ( ts > then && ts < now ) return ts
+    if ( ts > then && ts < now ) return log
   })
 })
 
@@ -134,7 +134,7 @@ export const selectLast = createSelector( logsSelectors.selectAll, logs => {
   logs.sort( (a, b) => new Date( b.timestamp ).getTime() - new Date( a.timestamp ).getTime())
   return logs[0]
 })
-*/
+
 
 export const selectLogs = (state: RootState) => state.logs
 
