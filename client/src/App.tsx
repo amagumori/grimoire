@@ -12,9 +12,9 @@ import './css/breathe.css';
 
 //import { rootReducer, RootState } from './services/store'
 import store from './services/store'
-import { List } from './components/List'
+import { CreateDummyTaskButton, List } from './components/List'
 import { CLI } from './components/CLI'
-import { TimeBar } from './components/NewTimeBar'
+import { TimeBar } from './components/New'
 
 type currentPage =
   | {
@@ -29,8 +29,8 @@ const App: React.FC = () => {
 
   const tenDaysAgo = 86400 * 1000 * 10
   const oneDay = 86400 * 1000 
-  const defaultTimebarEnd = new Date( Date.now() )
-  const defaultTimebarStart = new Date( Date.now() - oneDay )
+  const defaultTimebarEnd = new Date( Date.now() + 6 * 60 * 60000 )
+  const defaultTimebarStart = new Date( defaultTimebarEnd.getTime() - oneDay )
 
   //console.table( store.getState().logs ) 
   
@@ -39,8 +39,8 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <div className="app">
-        <List listType="tasks" tasks={store.getState().tasks} logs={store.getState().logs}/>
         <div className="test-timebar-container">
+          <CreateDummyTaskButton />
           <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} />
         </div>
       </div>

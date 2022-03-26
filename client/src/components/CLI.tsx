@@ -10,12 +10,12 @@ import { IoColorPaletteSharp } from 'react-icons/io5'
 import { selectLogs, logsSelectors } from '../services/logs'
 
 interface CLIProps {
-  logs: EntityState<Log>
-  currentTime: string
+  hidden: boolean
   playheadPos: number
   endPlayheadPos: number
-  playheadUpdate: React.ChangeEventHandler<HTMLInputElement>
-  togglePlayhead: React.FocusEventHandler<HTMLInputElement>
+  updateTimeSpent: React.ChangeEventHandler<HTMLInputElement>
+  toggleEndMarker: React.FocusEventHandler<HTMLInputElement>
+  toggleLogFormActive: React.FocusEventHandler
 }
 
 const sectorHints = [
@@ -35,23 +35,13 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const timeSpentRef = useRef<HTMLInputElement>(null)
 
-  const updateFunc = props.playheadUpdate;
+  const updateFunc = props.updateTimeSpent
+  const toggleActive = props.toggleLogFormActive
 
   //  const sortedLogs = useSelector(selectLogs).selectAll(store.getState())
   //
   const sortedLogs = logsSelectors.selectAll( store.getState() ) 
 
-  //console.log(sortedLogs)
-
-    /*
-  sortedLogs.sort( (a, b) => {
-    console.log('a: ' + a.timestamp)
-    console.log('b: ' + b.timestamp)
-    if ( a.timestamp > b.timestamp ) return 1
-    if ( a.timestamp < b.timestamp ) return -1
-    return 0
-  })
-     */
 
   const [logActive, toggleLog] = useState(false)
   const [sector, setSector] = useState("")
@@ -62,23 +52,14 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
   const [inputValue, setInputValue] = useState("")
   const [hintDict, setHintDict] = useState(sectorHints)
   const [hintsDisabled, toggleHints]  = useState(false)
+
+  const [focusState, setFocusState] = useState("")
+
   const dispatch = useDispatch()
 
   let logIcon: any
   let logBtn
 
-    /*
-  let lastLogDate = sortedLogs[0].timestamp
-
-  let month = lastLogDate.getMonth().toString()
-  let day = lastLogDate.getDay().toString()
-
-  let str = month + "/" + day 
-
-  let monthDate = ` ${lastLogDate.getMonth()} / ${lastLogDate.getDay()} `
-
-  let time = lastLogDate.toLocaleTimeString('en-US')
-     */
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
 
@@ -120,10 +101,9 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   
 
-  let firstInput = <input ref={inputRef} className={ hidden == true ? "cli-input hidden" : "cli-input" } onChange={onChange}></input>
+  //let firstInput = <input ref={inputRef} className={ hidden == true ? "cli-input hidden" : "cli-input" } onChange={onChange}></input>
 
-  let currentInput = firstInput 
-
+  //let currentInput = firstInput 
 
   useEffect( () => {
 
@@ -147,16 +127,6 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
           toggleCli(true)
         }
         
-        /*
-        if ( e.key == 'Backspace' ) {
-          console.log("input value: " + inputValue)
-          console.log("key: " + e.key)
-          console.log("we reached here")
-          if ( inputValue == "" && e.key == "Backspace" ) {
-            toggleSectorSet(false);
-          }
-        }
-         */
       }
     window.addEventListener('keyup', onKeyup);
   }, []) // empty array should mean only on component mount / unmount
@@ -174,7 +144,6 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   switch ( sector ) {
     case "programming":
-    //console.log('reached')
       let css = { "font-size": "14px" }
       logIcon = ( <HiTerminal className="input-icon" /> )
       break;
@@ -189,22 +158,112 @@ export const CLI: FunctionComponent<CLIProps> = ( props ) => {
       break;
   }
 
+  if ( hidden ) return null
 
   return(
     <div className="new-cli-wrapper breathe">
-      <form onSubmit={ onSubmit } >
+      <form onSubmit={ onSubmit } onBlur={toggleActive} onFocus={toggleActive} >
         {logBtn}
-        <div className="log-date">{ props.currentTime }</div>
         {logIcon}
         {currentInput}
         <div className={ timeSpentDisabled == true ? "time-spent-wrapper hidden" : "time-spent-wrapper" } >
           time spent:
-          <input className="time-spent" ref={timeSpentRef} onChange={ updateFunc } onFocus={props.togglePlayhead} ></input>
+          <input className="time-spent" ref={timeSpentRef} onChange={ props.updateTimeSpent } onFocus={props.toggleEndMarker} ></input>
         </div>
       </form>
     </div>
   )
 }
+
+interface ActionProps {
+  hidden: boolean
+  setFocusState: function
+}
+
+const ActionInput: FunctionComponent<ActionProps> = ( { hidden, setFocusState } ) => {
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+
+    switch( inputValue ) {
+      case "log": {
+        setActionState("log")
+        setInputValue("")
+        break
+      }
+      case "task": {
+        setActionState("task")
+        setInputValue("")
+        break
+      }
+      case "project": {
+        setActionState("project")
+        setInputValue("")
+        break
+      }
+      default: {
+        break
+      }
+    }
+  }
+
+  if ( hidden ) return null;
+
+  return (
+    <input onFocus={setFocusState("action")} onBlur={setFocusState("")} className="cli-input" onChange={onChange}></input>
+  )
+}
+
+interface SectorProps {
+  hidden: boolean
+  setFocusState: function
+  setSector: function
+}
+
+const SectorInput: FunctionComponent<SectorProps> = ( { hidden, setFocusState, setSector } ) => {
+
+  const [sectorIsValid, setSectorValid] = useState(false)
+  const [inputValue, setInputValue] = useState("")
+
+  const handleFill = ( word: String | Object | undefined ) => {
+    switch ( word ) {
+      case "programming":
+        setSector("programming")
+        setSectorValid(true)
+        break;
+      case "visual":
+        setSector("visual")
+        setSectorValid(true)
+        break;
+      default:
+        setSector("none")
+        break;
+    }
+  }
+
+  const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setInputValue(e.target.value)
+  }
+
+  const onKeyup = ( e: React.KeyboardEvent ) => {
+    if ( sectorValid === true ) {
+      if ( e.key === 'Space' || e.key === 'Tab' || e.key === ArrowRight ) {
+        setFocusState("timespent")
+      }
+    }
+  }
+
+  if ( hidden ) return null;
+  return (
+    <div className="sector-input-wrapper">
+      <Hint options={sectorHints} allowTabFill onFill={handleFill} >
+        <input className="cli-input" value={inputValue} onChange={onChange} ref={inputRef}></input>
+      </Hint>
+    </div>
+  )
+
+}
+
 
 interface DateProps {
   monthDate: String,

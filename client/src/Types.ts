@@ -3,7 +3,8 @@ export enum Sector {
   visual,
   programming,
   physical,
-  making
+  making,
+  none
 }
 
 export interface Log {
@@ -29,10 +30,10 @@ export interface Project {
 export interface Task {
   id?:                number,  // made id and logs optional for now bc postgres is creating id and logs are optional
   description:        string,
-  timestamp:          Date,
-  timeLastWorked:     Date,   
-  percentageFinished: number,
-  elapsedWorkTime:    string,
+  timestamp?:          Date,
+  timeLastWorked?:     Date,   
+  percentageFinished?: number,
+  elapsedWorkTime?:    string,
   logs?:              number[]  // array of log ids
 }
 

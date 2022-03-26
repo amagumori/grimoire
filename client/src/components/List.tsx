@@ -55,7 +55,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
       // timespent in SECONDS.
       let rand0 = Math.random()
       let rand1 = Math.random()
-      let timeSpent = Math.floor( rand0 * 360 ) // in minutes; 0-6 hours
+      let timeSpent = Math.floor( rand0 * 360 * 60000) // in minutes; 0-6 hours
       let sector = Sector.programming
       let dummyLog: Log = {
         description: desc,
@@ -65,7 +65,6 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
       }
 
       console.log( 'timespent in minutes: ' + timeSpent)
-      timeSpent *= 1000   // ms
       let incrementMs = timeSpent + Math.floor( ( rand1 * ( 3600 * 1000 ) ) )
       console.log('current timestamp ms: ' + currentTimestamp.getTime() )
       currentTimestamp.setTime( currentTimestamp.getTime() + incrementMs )

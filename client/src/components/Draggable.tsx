@@ -7,25 +7,25 @@ type DraggableProps = {
   onStop: Function,
   x: Number,
   y: Number,
-  gridX: Number,
-  gridY: Number
 }
 
 type DummyProps = {
+  hidden: boolean,
+  setPlayheadPos: Function,
   classString: string,
   parentWidth: number,
   parentX: number,
-  parentOffset: number,
-  timespan: number,
-  updateTime: Function
+  nowOffset: number
+  //timespan: number,
+  //updateTime: Function
 }
 
 type DraggableState = {
-  x: number,
-  timestamp: Date
+  x: number
+  //timestamp: Date
 }
 
-class Draggable extends React.Component<DummyProps, DraggableState> {
+export class Draggable extends React.Component<DummyProps, DraggableState> {
 
   private divRef: React.RefObject<HTMLDivElement>
   private timeRatio: number  = 0 
@@ -36,32 +36,33 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.setState( { x: this.props.parentX, timestamp: new Date(Date.now() - this.props.timespan ) })
+    this.setState( { x: this.props.parentX })
+    //this.setState( { x: this.props.parentX, timestamp: new Date(Date.now() - this.props.timespan ) })
 
     //console.log('effective time: ' + new Date( Date.now() - this.props.timespan ) )
 
     // timespan comes in in ms - this gives ms per pixel
-    this.timeRatio = this.props.timespan / this.props.parentWidth
+    //this.timeRatio = this.props.timespan / this.props.parentWidth
     
     //console.log('time ratio: ' + this.timeRatio)
   }
 
   componentDidMount() {
     this.setState( { 
-      x: this.props.parentX 
+      x: this.props.parentX + this.props.nowOffset
     })
   }
 
   componentDidUpdate( prevProps: DummyProps ) {
-    if ( prevProps.parentOffset !== this.props.parentOffset ) {
+    if ( prevProps.parentX !== this.props.parentX ) {
       this.setState({
-        x: this.props.parentX + this.props.parentOffset
+        x: this.props.parentX 
       })
     }
   }
 
   state: DraggableState = { 
-    timestamp: new Date(Date.now() - this.props.timespan),
+    //timestamp: new Date(Date.now() - this.props.timespan),
     x: this.props.parentX
   }
 
@@ -74,7 +75,6 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
       console.log('left: ' + box.left)
       this.setState({
         x: box.left
-        //relX: e.pageX - (box.left + body.scrollLeft - body.clientLeft)
       })
     };
   }
@@ -87,6 +87,7 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     }
     if ( x < this.props.parentX ) x = this.props.parentX
 
+      /*
     let xOffset = x - this.props.parentX
     //console.log('xof' + xOffset)
     let timeOffset = Math.trunc( xOffset * this.timeRatio )
@@ -96,6 +97,9 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     let timeString = time.toLocaleString('en-US')
 
     this.props.updateTime( timeString );
+       */
+
+    this.props.setPlayheadPos( x );
 
     if (x !== this.state.x ) { 
       this.setState({
@@ -145,7 +149,8 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
     }
    */
 
-    render() {
+  render() {
+    if ( !this.props.hidden ) {
         return <div
             className={this.props.classString}
             onMouseDown={this.onMouseDown}
@@ -158,7 +163,10 @@ class Draggable extends React.Component<DummyProps, DraggableState> {
             ref={this.divRef} 
         >
         </div>;
+    } else {
+      return null;
     }
+  }
 }
 
 export default Draggable;
@@ -168,3 +176,26 @@ export default React.forwardRef( (props: DummyProps, ref: React.MutableRefObject
   <Draggable { ...props } innerRef={ref} />
 })
    */
+
+interface MarkerProps {
+  hidden: boolean,
+  offset: number
+}
+
+export const EndMarker = ( { offset, hidden } : MarkerProps ) => { 
+  if ( !hidden ) {
+      return <div
+          className={ "gg-arrow-down" }
+          style={{
+              color: "#eee",
+              position: 'absolute',
+              left: offset,
+              touchAction: 'none'
+          }}
+      >
+      </div>;
+  } else {
+    return null;
+  }
+}
+
