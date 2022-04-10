@@ -13,7 +13,7 @@ import './css/breathe.css';
 //import { rootReducer, RootState } from './services/store'
 import store from './services/store'
 import { CreateDummyTaskButton, List } from './components/List'
-import { CLI } from './components/CLI'
+import { CLI } from './components/CLI-new'
 import { TimeBar } from './components/New'
 
 type currentPage =

@@ -1,7 +1,15 @@
+import React, { FunctionComponent, useEffect, useState, useRef } from 'react';
 import { Log, Sector } from '../Types'
 import { useDispatch } from 'react-redux'
+import { HiTerminal,  HiCode } from 'react-icons/hi'
+import { IoColorPaletteSharp } from 'react-icons/io5'
+import { Hint } from './Hint'
+
+import { createLog } from '../services/logs'
+
 
 interface CLIProps {
+  timestamp: Date
   updateTimeSpent: React.ChangeEventHandler<HTMLInputElement>
   toggleSpanMarker: React.FocusEventHandler<HTMLInputElement>
 }
@@ -17,15 +25,16 @@ const sectorHints = [
   "eng"
 ]
 
-export const CLI: FunctionComponent<CLIProps> = ( { updateTimeSpent, toggleSpanMarker } ) => {
+export const CLI: FunctionComponent<CLIProps> = ( props ) => {
 
   const dispatch = useDispatch()
 
-  const actionRef = useRef<ActionInput>(null)
-  const timeSpentRef = useRef<HTMLInputElement>()
+  //const actionRef = useRef<MutableRefObject<HTMLInputElement | undefined>>()
+  //const actionRef = useRef<HTMLInputElement>(null)
 
-  [ formState, setFormState ] = useState("")
-  [ active, setActive ] = useState(false)
+  const [ formState, setFormState ] = useState("")
+  const [ active, setActive ] = useState(false)
+  //const [ timeSpent, updateTimeSpent ] = useState(0)
 
   let logIcon: any
   let logButton
@@ -37,9 +46,11 @@ export const CLI: FunctionComponent<CLIProps> = ( { updateTimeSpent, toggleSpanM
       }
       if ( e.key == ' ' || ( e.key >= 'a' && e.key <= 'z' ) ) {
         setActive(true)
-        if ( actionRef.current !== null ) {
+          /*
+        if ( null !== actionRef.current ) {
           actionRef.current.focus()
         }
+           */
       }
     }
     // yes, we are registering a global event listener here for now.
@@ -48,67 +59,63 @@ export const CLI: FunctionComponent<CLIProps> = ( { updateTimeSpent, toggleSpanM
     window.addEventListener('keyup', onKeyup)
   }, [] )
 
-  const form = (formState) => {
+  const form = (formState: string) => {
     if ( formState === 'log' ) {
       return (
         <div className="new-cli-wrapper breathe">
-          <ActionInput active={false} />
-          <LogForm toggleEndMarker={toggleEndMarker} timestamp={timestamp} ref={timeSpentRef} />
+          <ActionInput active={false} setFormState={setFormState} />
+          <LogForm toggleEndMarker={props.toggleSpanMarker} timestamp={props.timestamp} updateTimeSpent={props.updateTimeSpent} />
         </div> 
       )
     }
     if ( formState === 'task' ) {
+      //<TaskForm />
       return (
         <div className="new-cli-wrapper breathe">
-          <ActionInput active={false} />
-          <TaskForm />
+          <ActionInput setFormState={setFormState} active={false} />
         </div> 
       )
     }
     if ( formState === 'project' ) {
+      // <ProjectForm />
       return (
         <div className="new-cli-wrapper breathe">
-          <ActionInput active={false} />
-          <ProjectForm />
+          <ActionInput setFormState={setFormState} active={false} />
         </div> 
       )
     }
   }
 
-  return (
-    <div className="new-cli-wrapper breathe">
-      <ActionInput active={false} setFormState={setFormState} />
-      <form onSubmit={ onSubmit }>
-        <ActionInput active={false} setFormState={setFormState} />
-        {logIcon}
-        {currentInput}
-        <div className="time-spent-wrapper">
-          time spent:
-          <input className="time-spent" ref={timeSpentRef} onChange={ props.updateTimeSpent } onFocus={props.toggleEndMarker} ></input>
-        </div>
-      </form>
-    </div>
+  if ( !form ) return ( <div></div> )
 
+  return (
+    <div>
+      {form}
+    </div>
   )
 
 }
 
 interface LogFormProps {
-  toggleEndMarker: function
+  toggleEndMarker: React.FocusEventHandler<HTMLInputElement>
+  updateTimeSpent: React.ChangeEventHandler<HTMLInputElement>
   timestamp: Date
 }
 
-const LogForm = React.forwardRef<HTMLInputElement, LogFormProps>( ( { toggleEndMarker, timestamp}, ref ) => {
+const LogForm: FunctionComponent<LogFormProps> = ( { toggleEndMarker, updateTimeSpent, timestamp } ) => {
+
+  const dispatch = useDispatch()
+
+  const [ timeSpent, setTimeSpent ] = useState(0)
   const [ textAreaActive, setTextAreaActive ] = useState(false)
-  const [sector, setSector] = useState<Sector>()
+  const [sector, setSector] = useState<Sector>(Sector.none)
   const [description, setDesc] = useState('')
-  const [timeSpent, setTimeSpent] = useState(0)
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
     let log: Log = {
       description: description,
       sector: sector,
-      timestamp: timestamp
+      timestamp: timestamp,
       timeSpent: timeSpent
     }
     dispatch( createLog( log ) )
@@ -116,20 +123,21 @@ const LogForm = React.forwardRef<HTMLInputElement, LogFormProps>( ( { toggleEndM
 
   return (
     <form onSubmit={ onSubmit }>
-      <SectorInput autoFocus sectorValue={sector} setSector={setSector} />
-      <div className={ formState == 'timespent' ? 'time-spent-wrapper' : 'hidden' } >
-        <input className="time-spent" ref={ref} onChange={setTimeSpent} value={timeSpent} onFocus={toggleEndMarker} onBlur={toggleEndMarker}></input>
+      <SectorInput active={ false } sectorValue={sector} setSector={setSector} />
+      <div className="time-spent-wrapper">
+        <input className="time-spent" onChange={updateTimeSpent} value={timeSpent} onFocus={toggleEndMarker} onBlur={toggleEndMarker}></input>
       </div>
       { textAreaActive === true ? <textarea className="log-description" /> : null }
     </form>
   )
 
-})
+}
 
+  /*
 interface TaskFormProps {
 }
 
-const TaskForm: FunctionComponent<> = ( {} ) => {
+const TaskForm: FunctionComponent = ( ) => {
   const [description, setDesc] = useState('')
 
   const descChange = desc => setDesc(desc)
@@ -147,22 +155,24 @@ const TaskForm: FunctionComponent<> = ( {} ) => {
     </form>
   )
 }
+   */
 
+  /*
 interface ProjectFormProps {
 }
 
-const ProjectForm: FunctionComponent<> = ( {} ) => {
+const ProjectForm: FunctionComponent = (  ) => {
   const onSubmit = ( e: React.SyntheticEvent ) => {
 
   }
 
 
 }
+   */
 
 interface ActionProps {
   active: boolean
-  setFormState: function
-  setFormType: 
+  setFormState: Function 
 }
 
 const ActionInput: FunctionComponent<ActionProps> = ( { active, setFormState } ) => {
@@ -219,12 +229,12 @@ const ActionInput: FunctionComponent<ActionProps> = ( { active, setFormState } )
 }
 
 interface SectorProps {
-  //active: boolean
+  active: boolean
   sectorValue: Sector
-  setSector: function
+  setSector: Function 
 }
 
-const SectorInput: FunctionComponent<SectorProps> = ( { sectorValue, setSector } ) => {
+const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, setSector } ) => {
 
   const [sectorIsValid, setSectorValid] = useState(false)
   const [inputValue, setInputValue] = useState("")
@@ -250,10 +260,12 @@ const SectorInput: FunctionComponent<SectorProps> = ( { sectorValue, setSector }
   }
 
   const onKeyup = ( e: React.KeyboardEvent ) => {
-    if ( sectorValid === true ) {
-      if ( e.key === 'Space' || e.key === 'Tab' || e.key === ArrowRight ) {
+    if ( sectorIsValid === true ) {
+      /*
+      if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'ArrowRight' ) {
         setFormState("timespent")
       }
+       */
       if ( e.key === 'Backspace' ) {
         setSector(Sector.none)
       }
@@ -262,7 +274,7 @@ const SectorInput: FunctionComponent<SectorProps> = ( { sectorValue, setSector }
 
   if ( !active ) return null;
 
-  if ( sectorValid ) {
+  if ( sectorIsValid ) {
     switch ( sectorValue ) {
       case Sector.programming:
         return ( <HiTerminal className="input-icon" /> )
