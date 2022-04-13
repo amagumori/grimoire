@@ -1,10 +1,10 @@
 export enum Sector {
-  music,
-  visual,
-  programming,
-  physical,
-  making,
-  none
+  music = "music",
+  visual = "visual",
+  programming = "programming",
+  physical = "physical",
+  making = "making",
+  none = "none"
 }
 
 export interface Log {

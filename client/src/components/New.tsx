@@ -28,7 +28,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const [ clientWidth, setClientWidth ] = useState(0)
   const [ clientOffset, setClientOffset ] = useState(0)
   const [ endMarkerPos, setEndMarker ] = useState(0)
-  const [ endMarkerHidden, toggleEndMarker ] = useState(true)
+  const [ spanMarkerHidden, toggleSpanMarker] = useState(true)
   const [ playheadPos, setPlayheadPos ] = useState(0)
 
   const [ logFormActive, setLogFormActive ] = useState(false)
@@ -47,10 +47,6 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     val = parseInt( e.target.value ) * 60000
     val *= ratio
     setEndMarker( Math.trunc(val) ) 
-  }
-
-  const toggleMarker = ( e: React.FocusEvent<HTMLInputElement> ) => {
-    toggleEndMarker(false)
   }
 
   const toggleLogFormActive = ( e: React.FocusEvent ) => {
@@ -119,14 +115,14 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   return (
     <div className="timebar-wrapper">
       <div>CURRENT LOG ID: { currentLogId }</div>
-      <CLI hidden={ logFormActive } toggleLogFormActive={ toggleLogFormActive } playheadPos={ offset } endPlayheadPos={ endMarkerPos } updateTimeSpent={ updateTimeSpent } toggleEndMarker={ toggleMarker } ></CLI>
+      <CLI hidden={ logFormActive } toggleLogFormActive={ toggleLogFormActive } playheadPos={ offset } endPlayheadPos={ endMarkerPos } updateTimeSpent={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } ></CLI>
       <div className="timebar" ref={timebarRef} >
 
         {entries}
 
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ nowOffset } />
-        <TimeSpan hidden={endMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
-      <EndMarker hidden={endMarkerHidden} offset={ playheadPos + endMarkerPos } />
+        <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
+      <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
       </div>
       <div className="clock"> { time } </div>
 
