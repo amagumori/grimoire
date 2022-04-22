@@ -49,16 +49,26 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     setEndMarker( Math.trunc(val) ) 
   }
 
-  const toggleLogFormActive = ( e: React.FocusEvent ) => {
-    setLogFormActive(!logFormActive)
+  /*
+  const toggleCLI = ( e: React.KeyboardEvent ) => {
+    if ( !logFormActive ) {
+      if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'l' ) {
+      setLogFormActive(true);
+      }
+    }
+    if ( logFormActive ) {
+      if ( e.key === 'Escape' ) {
+        setLogFormActive(false);
+      }
+    }
   }
+   */
 
     /*
   const toggleLogFormActiveInput = ( e: React.FocusEvent<HTMLInputElement> ) => {
     setLogFormActive(!logFormActive)
   }
      */
-
 
   useEffect( () => {
     dispatch( fetchLogs() )
@@ -112,10 +122,11 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     }
   })
 
+  //<CLI hidden={ logFormActive } toggleLogFormActive={ toggleLogFormActive } playheadPos={ offset } endPlayheadPos={ endMarkerPos } updateTimeSpent={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } ></CLI>
   return (
     <div className="timebar-wrapper">
       <div>CURRENT LOG ID: { currentLogId }</div>
-      <CLI hidden={ logFormActive } toggleLogFormActive={ toggleLogFormActive } playheadPos={ offset } endPlayheadPos={ endMarkerPos } updateTimeSpent={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } ></CLI>
+      <CLI updateTimespan={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } timestamp={ props.startTime }></CLI>
       <div className="timebar" ref={timebarRef} >
 
         {entries}
@@ -203,13 +214,13 @@ const EntryView: FunctionComponent<EntryViewProps> = ( props ) => {
 
   if ( log != undefined ) {
     switch ( log.sector ) {
-      case 1:
+      case "visual":
         logIcon = ( <BiCctv /> )
         break;
-      case 2:
+      case "programming":
         logIcon = ( <BiShapePolygon /> )
         break;
-      case 3:
+      case "music":
         logIcon = ( <BiEqualizer /> )
         break;
       default:
