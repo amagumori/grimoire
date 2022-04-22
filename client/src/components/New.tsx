@@ -37,7 +37,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const timespan = props.endTime.getTime() - props.startTime.getTime()
   const ratio = clientWidth / timespan
   // worst one-liner in history?
-  const time  = new Date( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) ).toLocaleString('en-US')
+  const timeStamp  = new Date( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) )
+  const time  = timeStamp.toLocaleString('en-US')
 
   const nowOffset = ( now.getTime() - props.startTime.getTime() ) * ratio
 
@@ -121,8 +122,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       return ( <TimeBarEntry id={log.id ? log.id : -1} selectLogHook={setCurrentLogId} css={css} /> )
     }
   })
-
-  //<CLI hidden={ logFormActive } toggleLogFormActive={ toggleLogFormActive } playheadPos={ offset } endPlayheadPos={ endMarkerPos } updateTimeSpent={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } ></CLI>
+  
   return (
     <div className="timebar-wrapper">
       <div>CURRENT LOG ID: { currentLogId }</div>
