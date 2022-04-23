@@ -65,6 +65,10 @@
     left: -5px
 }
 
+.timespan {
+  transition: width 0.3s ease-in-out;
+} 
+
 .timebar {
   height: 12px;
   overflow: hidden;
@@ -107,6 +111,14 @@
 
 .fi {
   animation: fadein 1s;
+}
+
+.log-form {
+  display: inline-block;
+}
+
+.log-form > i {
+  vertical-align: middle;
 }
 
 body {

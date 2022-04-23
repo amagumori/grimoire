@@ -150,7 +150,7 @@ interface TimeSpanProps {
 
 const TimeSpan: FunctionComponent<TimeSpanProps> = ( { hidden, offset, width } ) => {
   return (
-    <div style={{
+    <div className="timespan breathe" style={{
       position: "absolute",
       display: "inline",
       width: width,
