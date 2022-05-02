@@ -10,6 +10,37 @@ import { CLI } from './CLI-new'
 
 import { BiBody, BiCctv, BiShapePolygon, BiCycling, BiDna, BiEqualizer } from 'react-icons/bi'
 
+// we'll wrap our picker around the timebar for now.
+export const TimeBarContainer: FunctionComponent = () => {
+
+  const now = new Date( Date.now() )
+  const day = new Date( Date.now() - 86400000 )
+
+  const [ start, setStart ] = useState(new Date())
+  const [ end, setEnd ] = useState( new Date(Date.now()) )
+
+  const setDay = (e : React.MouseEvent<HTMLButtonElement> ) => { 
+    setStart( day ) 
+  }
+  const setWeek = (e : React.MouseEvent<HTMLButtonElement> ) => {
+    setStart( new Date( now.getTime() - 604800000 ) )
+  }
+  const setMonth = (e : React.MouseEvent<HTMLButtonElement> ) => {
+    setStart( new Date( now.getTime() - 2629800000 ) )
+  }
+
+  return ( 
+  <div className='timebar-wrapper'>
+    <div className='timebar-buttons'>
+      <button onClick={ setDay }>DAY</button>
+      <button onClick={ setWeek }>WEEK</button>
+      <button onClick={ setMonth }>MONTH</button>
+    </div>
+      <TimeBar startTime={start} endTime={end} /> 
+    </div>
+  )
+}
+
 interface TimeBarProps {
   startTime: Date
   endTime: Date

@@ -12,8 +12,8 @@ import { TaskItem, LogItem, ProjectItem } from './ListItem'
 
 interface ListProps {
   listType: string
-  tasks: EntityState<Task>
-  logs: EntityState<Log>
+  //tasks: EntityState<Task>
+  //logs: EntityState<Log>
 }
 
 export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
@@ -92,15 +92,15 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
   //const tasksFromSelector = useSelector(selectTasks)
   //const theTasks = useSelector(selectTasks)
   const theLogs = useSelector(selectLogs)
-  /*
+  
   useEffect( () => {
-    dispatch(fetchTasks())
-  }, [dispatch, tasks])
-  */
-  useEffect( () => {
-    dispatch(fetchLogs())
-  }, [dispatch, logs])
-
+    if ( props.listType === 'tasks' ) {
+      dispatch(fetchTasks())
+    } else if ( props.listType === 'logs' ) {
+      dispatch(fetchLogs())
+    }
+  }, [dispatch])
+ 
   if ( props.listType === 'tasks' ) {
     
     const selectAllTasks = tasksSelectors.selectAll(store.getState())
@@ -110,9 +110,9 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
 
     //console.log('taskItems: ' + taskItems)
 
+        //<CreateDummyTaskButton />
     return (
-      <div className="new-list-container">
-        <CreateDummyTaskButton />
+      <div className="task-container">
         { taskItems }
       </div>
     )

@@ -47,6 +47,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
     let onKeyup = ( e: KeyboardEvent ) => {
       if ( e.key === 'Escape' ) {
         setActive(false)
+        setFormState('none')
       }
       if ( e.key == ' ' || ( e.key >= 'a' && e.key <= 'z' ) ) {
         setActive(true)
@@ -71,7 +72,6 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
       //<TaskForm />
       return (
         <div className="new-cli-wrapper breathe">
-          <ActionInputTwo active={active} formState={formState} setFormState={setFormState} />
           <TaskForm />
         </div> 
       )
@@ -216,21 +216,28 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     toggleSpanMarker(false)
   }
 
+  const setTimespan = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    let t = parseInt(e.target.value)
+    updateTimespan(e)
+    setTimeSpent(t)
+  }
+
+  // now need to make it update timespan so we can create log
+
   if ( formState === 'log' ) {
   
     return (
       <form className="log-form" onSubmit={ onSubmit }>
         <SectorInput active={true} sectorValue={sector} setSector={setSector} />
-        <TimespanInput formState={formState} updateTimespan={updateTimespan} />
+        <div className="time-spent-wrapper">
+          <input className="time-spent" onChange={setTimespan} onFocus={toggleOn} onBlur={toggleOff}></input>
+        </div>
         { textAreaActive === true ? <textarea className="log-description" /> : null }
       </form>
     )
 
   } else return null;
 }
-
-//          <input autoFocus className="time-spent" onChange={updateTimespan} value={timeSpent} onFocus={toggleOn} onBlur={toggleOff}></input>
-
 
 interface TaskFormProps {
 }
@@ -258,6 +265,7 @@ const TaskForm: FunctionComponent = ( {} ) => {
   )
 }
 
+  /*
 interface TimespanInputProps {
   formState: string
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
@@ -275,17 +283,21 @@ const TimespanInput: React.FC<TimespanInputProps> = ( { formState, updateTimespa
     timespanInputRef.current && timespanInputRef.current.focus() 
   }
 
-  const InputField = React.forwardRef<HTMLInputElement>(( fwdRef: React.ForwardedRef<HTMLInputElement>) : JSX.Element => {
+  interface InputProps {
+    test: string 
+  }
+
+  const InputField = React.forwardRef<HTMLInputElement, InputProps>(( { test: string } , fwdRef: React.ForwardedRef<HTMLInputElement>) : JSX.Element => {
     return ( <input className="time-spent" onChange={updateTimespan} ></input> )
   })
 
   return ( 
     <div className="time-spent-wrapper">
-      <InputField />
+      <InputField test='foo'/>
     </div>
   )
 }
-
+   */
 
   /* 
 interface ProjectFormProps {
@@ -395,11 +407,11 @@ const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, set
     switch ( word ) {
       case "programming":
         setSector("programming")
-        setSectorValid(true)
+        //setSectorValid(true)
         break;
       case "visual":
         setSector("visual")
-        setSectorValid(true)
+        //setSectorValid(true)
         break;
       default:
         setSector("none")
@@ -409,13 +421,56 @@ const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, set
 
   const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setInputValue(e.target.value)
+
+    if ( inputValue === 'programming' || inputValue === 'visual' ) {
+      const target = e.target
+      const form = target.form
+        if ( form != null ) {
+          const index = Array.prototype.indexOf.call( form, target )
+          // this is a truly awful and brittle hack
+          // we have to jump forward 2 because there's a hidden input for the autocomplete.
+          if ( form.elements[index+2] != null ) {
+            let f = form.elements[index+2] as HTMLElement
+            f.focus()
+            //form.elements[index+1].focus()
+          }
+          e.preventDefault()
+        }
+      setSectorValid(true)
+    }
+
+    // more checking in her.e
   }
 
   const onKeyup = ( e: React.KeyboardEvent ) => {
+    /*
+    const target = e.target as HTMLInputElement
+    if ( target.value === 'programming' || target.value === 'visual' ) {
+      setSectorValid(true)
+      active = false
+    } else {
+      setSectorValid(false)
+      active = false
+    }
+     */
+
+    /*
     if ( sectorIsValid === true ) {
       if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'ArrowRight' ) {
+        const form = target.form
+        if ( form != null ) {
+          const index = Array.prototype.indexOf.call( form, target )
+          if ( form.elements[index+1] != null ) {
+            let f = form.elements[index+1] as HTMLElement
+            f.focus()
+            //form.elements[index+1].focus()
+          }
+          e.preventDefault()
+        }
         //setFormState("timespent")
+      
       }
+     */
       /*
       if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'ArrowRight' ) {
         setFormState("timespent")
@@ -424,13 +479,33 @@ const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, set
       if ( e.key === 'Backspace' ) {
         setSector(Sector.none)
       }
-    }
+    //}
   }
 
   if ( !active ) return null;
 
-  if ( sectorIsValid ) {
-    switch ( sectorValue ) {
+  return (
+    <span className="sector" >
+      <div className={ sectorIsValid ? "hidden" : "sector-input-wrapper" } > 
+        <Hint options={sectorHints} allowTabFill onFill={handleFill} >
+          <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
+        </Hint>
+      </div>
+      <SectorIcon active={sectorIsValid} sector={sectorValue} />
+    </span>
+  )
+
+}
+
+interface SectorIconProps {
+  active: boolean
+  sector: Sector 
+}
+
+const SectorIcon: FunctionComponent<SectorIconProps> = ( { active, sector } ) => {
+
+  if ( active ) {
+    switch ( sector ) {
       case "programming":
         return ( <HiTerminal className="input-icon" /> )
         break;
@@ -438,20 +513,14 @@ const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, set
         return ( <IoColorPaletteSharp /> )
         break;
       case "none":
+        return null;
         break;
       default:
+        return null;
         break;
     }
   }
 
-  return (
-    <div className="sector-input-wrapper">
-      <Hint options={sectorHints} allowTabFill onFill={handleFill} >
-        <input autoFocus className="cli-input" value={inputValue} onChange={onChange}></input>
-      </Hint>
-    </div>
-  )
-
+  return null;
+  
 }
-
-

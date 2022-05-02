@@ -14,7 +14,8 @@ import './css/breathe.css';
 import store from './services/store'
 import { CreateDummyTaskButton, List } from './components/List'
 import { CLI } from './components/CLI-new'
-import { TimeBar } from './components/New'
+import { TimeBarContainer, TimeBar } from './components/New'
+import { TileView } from './components/Tiles'
 
 type currentPage =
   | {
@@ -39,13 +40,17 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <div className="app">
+      <div className="tasks-banner">Tasks</div>
+        <List listType="tasks" />
+        <TileView />
         <div className="test-timebar-container">
           <CreateDummyTaskButton />
-          <TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} />
+          <TimeBarContainer />
         </div>
       </div>
     </Provider>
   )
 }
 
+//<TimeBar startTime={defaultTimebarStart} endTime={defaultTimebarEnd} />
 export default App;

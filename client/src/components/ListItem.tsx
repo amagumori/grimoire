@@ -2,8 +2,9 @@ import React, { useState, FunctionComponent } from 'react';
 import { Task, Project, Log } from '../Types'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
-//import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-//import { faHeadphones, faTerminal, faPenFancy } from '@fortawesome/free-solid-svg-icons'
+import { HiTerminal,  HiCode } from 'react-icons/hi'
+import { IoColorPaletteSharp } from 'react-icons/io5'
+import { FcLowPriority } from 'react-icons/fc'
 
 import store from '../services/store'
 import { Sector } from '../Types'
@@ -13,15 +14,27 @@ type ProjectProps = Project
 type LogProps = Log 
 
 export const TaskItem: FunctionComponent<TaskProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
-  
+
+  let month = 0
+  let day = 0
+
+  if ( timestamp != undefined ) {
+    month = new Date( timestamp ).getMonth()
+    day = new Date( timestamp ).getDate() 
+  }
+
   return (
     <div className="taskEntry" key={ id } >
-      <div className="task-date"> { timestamp } </div>
+      <div className="date">
+        { month } / { day } 
+      </div>
+      <FcLowPriority />
       <div className="task-name"> { description } </div>
     </div>
   ) 
 }
 
+      //<div className="task-date"> { timestamp } </div>
 export const LogItem: FunctionComponent<LogProps> = ( {id, description, timestamp, timeSpent, sector, projectId, taskId } ) => {
   
   return (
