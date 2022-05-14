@@ -39,6 +39,19 @@ export const fetchLogs = createAsyncThunk<Log[], void, {state: LogsState} >(
   }
 )
 
+/*
+export const createLog = createAsyncThunk(
+  'logs/createLogStatus',
+  async ( log, thunkAPI ) => {
+    // doing this explicit any typing to circumvent what seems to be a bug in Axios itself as of 0.23.0
+    const response: any = await axios.post('/api/log', log);
+    console.log('createLog response: ' + JSON.stringify(response))
+    return response.data.log;
+  }
+)
+*/
+
+
 export const createLog = createAsyncThunk<Log, Log, {state: LogsState} >(
   'logs/createLogStatus',
   async ( log, thunkAPI ) => {
@@ -48,6 +61,7 @@ export const createLog = createAsyncThunk<Log, Log, {state: LogsState} >(
     return response.data.log;
   }
 )
+
 
 export const updateLogById = createAsyncThunk<LogUpdate, LogUpdate, {state: LogsState} >(
   'logs/updateLogByIdStatus',
@@ -120,7 +134,6 @@ export const logsSelectors = logsAdapter.getSelectors<RootState>(
 
 var allLogs = logsSelectors.selectAll
 
-
 export const select24h = createSelector( allLogs, logs => {
   var now = new Date( Date.now() )
   var then = new Date( Date.now() - 86400000 )
@@ -135,25 +148,18 @@ export const selectLast = createSelector( logsSelectors.selectAll, logs => {
   return logs[0]
 })
 
+// O'boy
+export const makeSelectRange = (start: number, end: number) => {
+  const selector = createSelector(
+    logsSelectors.selectAll,
+    (logs) => logs.filter( (log) => {
+      // this is disgusting and fills me with rage.  thanks typeORM!
+      return new Date(log.timestamp).getTime() > start && new Date(log.timestamp).getTime() < end 
+    })
+  );
+  return selector;
+}
 
 export const selectLogs = (state: RootState) => state.logs
 
-/*
-export const sortLogsByDateDescending = createSelector( (state: RootState) => {
-  let dumbWay = []
-
-  // entity | id: T
-  for ( const val in state.logs.entities ) {
-    console.log(val)
-    dumbWay.push(val)
-  }
-
-  dumbWay.sort( (a, b) => {
-  if ( a.timestamp > b.timestamp ) return 1
-  if ( a.timestamp < b.timestamp ) return -1
-  return 0
-  })
-}, result => result
-)
-*/
 export default logsSlice.reducer

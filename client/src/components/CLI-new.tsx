@@ -1,6 +1,6 @@
 import React, { forwardRef, ForwardRefExoticComponent, FunctionComponent, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
-import { useAppDispatch } from '../services/store'
+import { useAppDispatch, AppDispatch, useTestDispatch, useAppThunkDispatch, useTypedDispatch } from '../services/store'
 import { Hint } from './Hint'
 import { Log, Task, Sector } from '../Types'
 import { EntityState } from '@reduxjs/toolkit'
@@ -12,7 +12,7 @@ import { createLog, selectLogs, logsSelectors } from '../services/logs'
 import { createTask } from '../services/tasks'
 
 interface CLIProps {
-  timestamp: Date
+  timestamp: Date 
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
     //toggleSpanMarker: React.FocusEventHandler<HTMLInputElement>
   toggleSpanMarker: Function
@@ -49,7 +49,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
         setActive(false)
         setFormState('none')
       }
-      if ( e.key == ' ' || ( e.key >= 'a' && e.key <= 'z' ) ) {
+      if ( e.key == ' ' || ( e.key >= 'a' && e.key <= 'z' ) || e.key == 'Tab' ) {
         setActive(true)
       }
     }
@@ -72,7 +72,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
       //<TaskForm />
       return (
         <div className="new-cli-wrapper breathe">
-          <TaskForm />
+          <TaskForm timestamp={timestamp} />
         </div> 
       )
     }
@@ -185,13 +185,13 @@ const ActionInputTwo: React.FC<ActionProps> = ( { active, formState, setFormStat
 interface LogFormProps {
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
   toggleSpanMarker: Function
-  timestamp: Date,
+  timestamp: Date ,
   formState: string 
 }
 
 const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker, updateTimespan, timestamp } ) => {
 
-  const dispatch = useDispatch()
+  const dispatch: AppDispatch = useDispatch()
 
   const [ timeSpent, setTimeSpent ] = useState(0)
   const [ textAreaActive, setTextAreaActive ] = useState(false)
@@ -205,7 +205,7 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
       timestamp: timestamp,
       timeSpent: timeSpent
     }
-    dispatch( createLog( log ) )
+    dispatch( createLog(log) )
   }
 
   const toggleOn = ( e: React.FocusEvent<HTMLInputElement> ) => {
@@ -240,19 +240,27 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
 }
 
 interface TaskFormProps {
+  timestamp: Date 
 }
 
-const TaskForm: FunctionComponent = ( {} ) => {
+const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const dispatch = useDispatch()
 
   const [description, setDesc] = useState('')
+
+  const timeLastWorked = new Date( Date.now() )
 
   const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setDesc(e.target.value) 
   }
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
+    e.preventDefault();
     let task: Task = {
+      timestamp: timestamp,
+      timeLastWorked: timeLastWorked,
+      percentageFinished: 0,
+      elapsedWorkTime: 50,
       description: description
     }
     dispatch( createTask( task ) )      
@@ -260,7 +268,7 @@ const TaskForm: FunctionComponent = ( {} ) => {
 
   return (
     <form onSubmit={ onSubmit }>
-      <input className="task-description" onChange={descChange} value={description}></input>
+      <input autoFocus className="task-description" onChange={descChange} value={description}></input>
     </form>
   )
 }

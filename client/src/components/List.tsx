@@ -25,17 +25,17 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
   function makeDummyTask() {
     let desc = faker.lorem.sentence()
-    let timestamp: Date = new Date( Date.now() )
-    let timeLastWorked: Date  = new Date( Date.now() )
+    let timestamp = new Date( Date.now() )
+    let timeLastWorked = new Date( Date.now() )
     let percentageFinished = Math.floor( Math.random() * 100 )
-    let elapsedTime = "1 hour 35 minutes"
+    //let elapsedTime = "1 hour 35 minutes"
 
     let dummyTask: Task = {
       description: desc,
       timestamp: timestamp,
       timeLastWorked: timeLastWorked,
       percentageFinished: percentageFinished,
-      elapsedWorkTime: elapsedTime
+      elapsedWorkTime: 60  
     }
     console.log(dummyTask)
     dispatch(createTask(dummyTask));
@@ -43,31 +43,33 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
   function generateDummyLogs() {
     const dayInMs = 86400 * 1000
-    const today = new Date()
-    const yesterday = new Date( today.getTime() - dayInMs )
+    const yesterday = Date.now() - dayInMs
 
     //let currentTimestamp = new Date( "2021-11-20T00:00:00+0000" )
-    let currentTimestamp = yesterday
+    // do a whole month
+    let currentTimestamp = Date.now() - ( dayInMs * 5 )
 
-    for ( var i=0; i < 50; i++ ) {
+    for ( var i=0; i < 38; i++ ) {
+      //if ( currentTimestamp >= Date.now() ) break;
       let desc = faker.lorem.sentence()
       let timestamp = currentTimestamp
       // timespent in SECONDS.
       let rand0 = Math.random()
       let rand1 = Math.random()
-      let timeSpent = Math.floor( rand0 * 360 * 60000) // in minutes; 0-6 hours
+      let timeSpent = Math.floor( rand0 * 120 * 60000)
       let sector = Sector.programming
       let dummyLog: Log = {
         description: desc,
-        timestamp: timestamp,
+        timestamp: new Date(timestamp),
         timeSpent: timeSpent,
         sector: sector
       }
 
       console.log( 'timespent in minutes: ' + timeSpent)
-      let incrementMs = timeSpent + Math.floor( ( rand1 * ( 3600 * 1000 ) ) )
-      console.log('current timestamp ms: ' + currentTimestamp.getTime() )
-      currentTimestamp.setTime( currentTimestamp.getTime() + incrementMs )
+      //let incrementMs = timeSpent + Math.floor( ( rand1 * ( 3600 * 1000 ) ) )
+      let incrementMs = timeSpent + Math.floor( ( rand1 * ( 240 * 60000 ) ) )
+      console.log('current timestamp ms: ' + currentTimestamp )
+      currentTimestamp += incrementMs;
 
       console.log('increment in ms: ' + incrementMs )
       //console.log("dummy log: " + JSON.stringify(dummyLog))
@@ -92,6 +94,7 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
   //const tasksFromSelector = useSelector(selectTasks)
   //const theTasks = useSelector(selectTasks)
   const theLogs = useSelector(selectLogs)
+  const theTasks = useSelector(tasksSelectors.selectAll); 
   
   useEffect( () => {
     if ( props.listType === 'tasks' ) {
@@ -103,10 +106,10 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
  
   if ( props.listType === 'tasks' ) {
     
-    const selectAllTasks = tasksSelectors.selectAll(store.getState())
+    //const selectAllTasks = tasksSelectors.selectAll(store.getState())
     //console.log('tasks: ' + selectAllTasks);
     //console.log('tasks from selector: ' + JSON.stringify(theTasks));
-    const taskItems = selectAllTasks.map( (task) => <TaskItem key={task.id} {...task} /> )
+    const taskItems = theTasks.map( (task) => <TaskItem key={task.id} {...task} /> )
 
     //console.log('taskItems: ' + taskItems)
 
@@ -151,7 +154,5 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
      return <div>ya fucked up.  incorrect list type.</div>
   }
 }
-
-
 
 export default List

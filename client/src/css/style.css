@@ -88,6 +88,7 @@
 }
 
 .timebar-entry {
+  position: relative;
   margin-bottom: 2px;
   border-radius: 2px;
   display: inline-block;
@@ -202,7 +203,7 @@ li {
 }
 
 .task-container {
-  margin-left: 50%;
+  margin-left: 25%;
   margin-right: 25%;
   display: grid;
   grid-auto-rows: min-content;
@@ -433,6 +434,12 @@ h1 {
   padding: 0.5em;
   background: rgba(50, 185, 82, 0.7);
   animation: fade 0.75s ease-in-out;
+}
+
+.form-success {
+  background: rgba(50, 255, 82, 0.7);
+  animation: fade 1s ease-in-out;
+  width: 100%;
 }
 
 .cli-instructions {

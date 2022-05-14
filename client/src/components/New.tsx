@@ -3,7 +3,7 @@ import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
 
-import { fetchLogs, selectLogs, logsSelectors, select24h } from '../services/logs'
+import { fetchLogs, selectLogs, logsSelectors, select24h, makeSelectRange } from '../services/logs'
 import store from '../services/store'
 import { Draggable, EndMarker } from './Draggable'
 import { CLI } from './CLI-new'
@@ -13,20 +13,20 @@ import { BiBody, BiCctv, BiShapePolygon, BiCycling, BiDna, BiEqualizer } from 'r
 // we'll wrap our picker around the timebar for now.
 export const TimeBarContainer: FunctionComponent = () => {
 
-  const now = new Date( Date.now() )
-  const day = new Date( Date.now() - 86400000 )
+  const now = Date.now()
+  const day = new Date( now - 86400000 )
 
-  const [ start, setStart ] = useState(new Date())
-  const [ end, setEnd ] = useState( new Date(Date.now()) )
+  const [ start, setStart ] = useState(new Date(now))
+  const [ end, setEnd ] = useState( new Date(now) )
 
   const setDay = (e : React.MouseEvent<HTMLButtonElement> ) => { 
     setStart( day ) 
   }
   const setWeek = (e : React.MouseEvent<HTMLButtonElement> ) => {
-    setStart( new Date( now.getTime() - 604800000 ) )
+    setStart( new Date( now - 604800000 ) )
   }
   const setMonth = (e : React.MouseEvent<HTMLButtonElement> ) => {
-    setStart( new Date( now.getTime() - 2629800000 ) )
+    setStart( new Date( now - 2629800000 ) )
   }
 
   return ( 
@@ -50,7 +50,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const dispatch = useDispatch()
   const timebarRef: React.RefObject<HTMLDivElement> = useRef(null)
 
-  const theLogs = useSelector( logsSelectors.selectAll )
+  const sel = makeSelectRange( props.startTime.getTime(), props.endTime.getTime() )
+
+  const theLogs = useSelector( sel );
+  //const theLogs = useSelector( logsSelectors.selectAll )
   const last24  = useSelector( select24h )
 
   const [ loaded, setLoaded ] = useState(false)
@@ -68,8 +71,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const timespan = props.endTime.getTime() - props.startTime.getTime()
   const ratio = clientWidth / timespan
   // worst one-liner in history?
-  const timeStamp  = new Date( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) )
-  const time  = timeStamp.toLocaleString('en-US')
+  const playheadTimestamp = new Date( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) )
+  const time = playheadTimestamp.toLocaleString('en-US')
 
   const nowOffset = ( now.getTime() - props.startTime.getTime() ) * ratio
 
@@ -111,21 +114,49 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     }
   }, [dispatch])
 
+    /*
   let logsToShow = theLogs.filter( (log) => {
     // take this out to see if it will compare stored Date objects as "real" ones
-    let ts = new Date( log.timestamp ).getTime()
-    return ts > props.startTime.getTime() && ts < props.endTime.getTime()
+    return log.timestamp > props.startTime.getTime() && log.timestamp < props.endTime.getTime()
   })
+  */
 
   let offset = 0
-  const timeRatio = (time: number) => { return ( time / timespan ) * 100 }
+  const timeRatio = (time: number) => { return ( time / timespan ) }
+
+  const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
+    let currentTs = new Date( log.timestamp ).getTime()
+    let offset = timeRatio( currentTs - props.startTime.getTime() )
+    offset *= clientWidth
+    //let perc = timeRatio( log.timeSpent )   // should be ms as with everything now.
+    let perc = `${timeRatio(log.timeSpent) * 100 }%`
+    let rand0 = Math.random()
+    let rand1 = Math.random()
+    let css = {
+      width: perc,
+      left: offset,
+      backgroundColor: `rgba(${rand1 * 255}, ${rand0 * 255}, ${rand1 * 255}, ${rand0 * 255} )`
+    }
+    return ( <TimeBarEntry id={log.id ? log.id : -1 } selectLogHook={setCurrentLogId} css={css} /> )
+  })
+
+    /*
   const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
     let nextLog = logs[index+1]
     let prevLog = logs[index-1]
-    let currTimestamp = new Date(log.timestamp).getTime()
+
+    // this is awful.
+    let currTimestamp = new Date( log.timestamp ).getTime()
+
+    if ( prevLog == undefined ) {
+      offset += timeRatio( currTimestamp - props.startTime.getTime() )
+    }
 
     if ( nextLog != undefined && prevLog != undefined ) {
-      let prevTimestamp = new Date(prevLog.timestamp).getTime()
+      if ( offset <= timeRatio( currTimestamp ) ) {
+        return ( <div className="empty-entry"></div> )
+      }
+      let prevTimestamp = new Date( prevLog.timestamp ).getTime()
       let unloggedTimeMs = currTimestamp - ( prevTimestamp + prevLog.timeSpent )
       let unloggedPercentage = timeRatio(unloggedTimeMs)
       let prevLoggedWidth = timeRatio(prevLog.timeSpent)
@@ -136,28 +167,30 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
       let css = {
         width: loggedPercentage,
         left: offset,
-        backgroundColor: `rgba(0, 255, 255, ${255 * ( log.timeSpent / 3600000 )})`
+        backgroundColor: `rgba(0, ${log.timeSpent}, ${log.timeSpent}, ${255 * ( log.timeSpent / 3600000 )})`
       }
 
       // quick hack until figure out a better way to use serial ids that are only backend side
       return ( <TimeBarEntry id={log.id ? log.id : -1} selectLogHook={setCurrentLogId} css={css} /> )
 
     } else {
-      let loggedPercentage = ( log.timeSpent / timespan ) * 100
+      let loggedPercentage = timeRatio( log.timeSpent )
       let css = {
         width: loggedPercentage,
         left: offset,
-        backgroundColor: `rgba(0, 255, 180, ${log.timeSpent})`
+        backgroundColor: `rgba(0, ${log.timeSpent}, 180, 255)`
       }
+      offset += timeRatio( currTimestamp ) + loggedPercentage
 
       return ( <TimeBarEntry id={log.id ? log.id : -1} selectLogHook={setCurrentLogId} css={css} /> )
     }
   })
-  
+  */
+
   return (
     <div className="timebar-wrapper">
       <div>CURRENT LOG ID: { currentLogId }</div>
-      <CLI updateTimespan={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } timestamp={ props.startTime }></CLI>
+      <CLI updateTimespan={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } timestamp={ playheadTimestamp}></CLI>
       <div className="timebar" ref={timebarRef} >
 
         {entries}
@@ -200,15 +233,15 @@ interface EntryProps {
   css: React.CSSProperties
 }
 
-const TimeBarEntry: FunctionComponent<EntryProps> = ( props ) => {
+const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, selectLogHook, css } ) => {
 
-  const baseCSS = props.css
-  let setLogId = props.selectLogHook
+  //const baseCSS = props.css
 
-  let baseColor = props.css.backgroundColor
+  //let baseColor = props.css.backgroundColor
 
-  const [css, setCSS] = useState<React.CSSProperties>()
-    
+  //const [css, setCSS] = useState<React.CSSProperties>()
+
+    /*
   const onMouseEnter = ( e: React.MouseEvent<HTMLDivElement> ) => {
     let color = { background: 'red' } 
     let newCSS = { ...baseCSS, ...color }
@@ -220,13 +253,15 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( props ) => {
     let newCSS = { ...baseCSS, newColor }
     setCSS( { ...baseCSS, ...newColor } )
   }
+     */
 
   const onClick = ( e: React.MouseEvent<HTMLDivElement> ) => {
-    setLogId( props.id )
+    selectLogHook( id )
   }
 
+  // style
   return (
-    <div key={ props.id } className="timebar-entry" style={ css } onClick={ onClick } onMouseOver={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div key={ id } className="timebar-entry" style={css} onClick={ onClick }>
     </div>
   )
 }
@@ -263,24 +298,19 @@ const EntryView: FunctionComponent<EntryViewProps> = ( props ) => {
     return null
   }
 
+  if ( hidden ) return null
+
   // this is just insane
   let start = new Date(log.timestamp)
-  let end = new Date( start.getTime() + ( log.timeSpent * 60000 ) )
+  let end = new Date( start.getTime() + ( log.timeSpent ) )
 
+  //<span className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes() }</span>
   return (
-    <div>
-    { hidden ? 
-    <div key={ props.logId} className="entry-view">
-      <div className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes()} </div>
-      <div className="sector">{ logIcon }</div>
-      <div className="entry-description">{log.description}</div>
-    </div> 
-    : 
     <div key={ props.logId } className="entry-view">
-      <div className="sector">{ logIcon } <span className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes()}</span></div>
+      <div className="sector">{ logIcon }</div>
+      <div className="entry-time">{ start.toLocaleString('en-US') }</div>
+      <div className="entry-time">{ end.toLocaleString('en-US') }</div>
       <div className="entry-description">{log.description}</div>
-    </div> 
-    }
     </div>
   )
    
