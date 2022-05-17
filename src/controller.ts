@@ -8,7 +8,6 @@ export const createProject = async ( body: any ) => {
 
   project.name = name;
   project.description = desc;
-  project.percentageFinished = percentageFinished;
   project.sector = sector;
 
   await projectRepo.save(project);

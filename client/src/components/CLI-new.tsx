@@ -72,7 +72,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
       //<TaskForm />
       return (
         <div className="new-cli-wrapper breathe">
-          <TaskForm />
+          <TaskForm timestamp={timestamp} />
         </div> 
       )
     }
@@ -240,9 +240,10 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
 }
 
 interface TaskFormProps {
+  timestamp: Date
 }
 
-const TaskForm: FunctionComponent = ( {} ) => {
+const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const dispatch = useDispatch()
 
   const [description, setDesc] = useState('')
@@ -251,8 +252,15 @@ const TaskForm: FunctionComponent = ( {} ) => {
     setDesc(e.target.value) 
   }
 
+  const now = new Date( Date.now() )
+
   const onSubmit = ( e: React.SyntheticEvent ) => {
+    e.preventDefault()
     let task: Task = {
+      timestamp: timestamp,
+      percentageFinished: 0,
+      timeLastWorked: now,
+      elapsedWorkTime: 0,
       description: description
     }
     dispatch( createTask( task ) )      
@@ -260,10 +268,51 @@ const TaskForm: FunctionComponent = ( {} ) => {
 
   return (
     <form onSubmit={ onSubmit }>
-      <input className="task-description" onChange={descChange} value={description}></input>
+      <input autoFocus className="task-description" onChange={descChange} value={description}></input>
     </form>
   )
 }
+
+interface SubTaskFormProps {
+  test: string
+}
+
+
+const SubTaskForm: FunctionComponent<TaskFormProps> = ( { test } ) => {
+
+  const dispatch = useDispatch()
+
+  useEffect( () => {
+    dispatch( fetchTasks() )
+  }, [dispatch] )
+
+  const tasks = 
+
+
+
+  const [ description, setDesc ] = useState('')
+
+  const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setDesc( e.target.value )
+  }
+
+  const onSubmit = ( e: React.SyntheticEvent ) => {
+    e.preventDefault();
+    let task: Task = {
+
+    }
+    dispatch( createTask( task ) )
+  }
+
+
+  return (
+    <form onSubmit={ onSubmit }>
+      <Hint options={sectorHints} allowTabFill onFill={handleFill} >
+        <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
+      </Hint>
+      <input autoFocus className="task-description" onChange={descChange} value={description}></input>
+    </form>
+  )
 
   /*
 interface TimespanInputProps {

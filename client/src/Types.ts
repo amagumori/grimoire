@@ -19,22 +19,23 @@ export interface Log {
 
 export interface Project {
   id:                 number,
+  name:               string,
   description:        string,
   timestamp:          number,
   timeLastWorked:     Date,
-  percentageFinished: number,
-  elapsedWorkTime:    string,
-  logs:               number[]  // array of log ids
+  logs:               Log[]  // array of log ids
 }
 
 export interface Task {
   id?:                number,  // made id and logs optional for now bc postgres is creating id and logs are optional
+  active:             boolean,
   description:        string,
   timestamp?:          Date,
   timeLastWorked?:     Date,   
   percentageFinished?: number,
-  elapsedWorkTime?:    string,
-  logs?:              number[]  // array of log ids
+  elapsedWorkTime?:    number,
+  subTasks?:           Task[] // task id
+  logs?:               Log[]  // array of log ids
 }
 
 

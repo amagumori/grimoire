@@ -28,7 +28,8 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
     let timestamp: Date = new Date( Date.now() )
     let timeLastWorked: Date  = new Date( Date.now() )
     let percentageFinished = Math.floor( Math.random() * 100 )
-    let elapsedTime = "1 hour 35 minutes"
+    // we're turning elapsedtime into a minute value 
+    let elapsedTime = 35
 
     let dummyTask: Task = {
       description: desc,
