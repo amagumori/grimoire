@@ -191,7 +191,7 @@ interface LogFormProps {
 
 const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker, updateTimespan, timestamp } ) => {
 
-  const dispatch: AppDispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   const [ timeSpent, setTimeSpent ] = useState(0)
   const [ textAreaActive, setTextAreaActive ] = useState(false)
@@ -244,7 +244,7 @@ interface TaskFormProps {
 }
 
 const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   const [description, setDesc] = useState('')
 

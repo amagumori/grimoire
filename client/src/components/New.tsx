@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
 
 import { fetchLogs, selectLogs, logsSelectors, select24h, makeSelectRange } from '../services/logs'
-import store from '../services/store'
+import store, { useAppDispatch } from '../services/store'
 import { Draggable, EndMarker } from './Draggable'
 import { CLI } from './CLI-new'
 
@@ -47,7 +47,7 @@ interface TimeBarProps {
 }
 
 export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const timebarRef: React.RefObject<HTMLDivElement> = useRef(null)
 
   const sel = makeSelectRange( props.startTime.getTime(), props.endTime.getTime() )

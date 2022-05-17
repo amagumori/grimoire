@@ -7,7 +7,7 @@ import { useDispatch, useSelector, connect } from 'react-redux'
 import { tasksSelectors, selectTasks, createTask, fetchTasks } from '../services/tasks'
 import { logsSelectors, selectLogs, fetchLogs, createLog } from '../services/logs'
 import { projectsSelectors } from '../services/projects'
-import store from '../services/store'
+import store, { useAppDispatch } from '../services/store'
 import { TaskItem, LogItem, ProjectItem } from './ListItem'
 
 interface ListProps {
@@ -18,7 +18,7 @@ interface ListProps {
 
 export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   // build faker object then add onclick handler to call createTask with the fake object.
   // mock out api calls / backend stuff this way.
@@ -86,7 +86,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
 export const List: FunctionComponent<ListProps> = ( props ) => {
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   //const [listType, tasks] = useState(0)
   const [listType, logs] = useState(0)
   //dispatch(fetchTasks())

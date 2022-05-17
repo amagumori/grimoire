@@ -30,6 +30,7 @@ const logsAdapter = createEntityAdapter<Log>({
 
 // still don't fully understand why i have to put all these in extraReducers anyway.
 
+/*
 export const fetchLogs = createAsyncThunk<Log[], void, {state: LogsState} >(
   'logs/fetchLogsStatus',
   async( _, thunkAPI ) => {
@@ -38,6 +39,17 @@ export const fetchLogs = createAsyncThunk<Log[], void, {state: LogsState} >(
     return response.data;
   }
 )
+*/
+
+export const fetchLogs = createAsyncThunk(
+  'logs/fetchLogsStatus',
+  async () => {
+    const res = await axios.get<Log[]>('/api/log')
+    return res.data
+  }
+)
+
+
 
 /*
 export const createLog = createAsyncThunk(
@@ -51,7 +63,15 @@ export const createLog = createAsyncThunk(
 )
 */
 
+export const createLog = createAsyncThunk(
+  'logs/createLogStatus',
+  async( log: Log ) => {
+    const response: any = await axios.post('/api/log', log)
+    return response.data.log
+  }
+)
 
+/*
 export const createLog = createAsyncThunk<Log, Log, {state: LogsState} >(
   'logs/createLogStatus',
   async ( log, thunkAPI ) => {
@@ -61,6 +81,7 @@ export const createLog = createAsyncThunk<Log, Log, {state: LogsState} >(
     return response.data.log;
   }
 )
+*/
 
 
 export const updateLogById = createAsyncThunk<LogUpdate, LogUpdate, {state: LogsState} >(

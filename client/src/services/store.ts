@@ -18,9 +18,7 @@ export type RootState = ReturnType<typeof rootReducer>
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: [ thunk, logger ]
-  //middleware: [ ...getDefaultMiddleware<RootState>() ] as const,
-  //devTools: true
+  devTools: true
 })
 
 export type AppDispatch = typeof store.dispatch

@@ -1,12 +1,11 @@
 import React, { useEffect, FunctionComponent } from 'react';
-import { useDispatch } from 'react-redux';
 import { logsSelectors, selectLogs, fetchLogs, createLog } from '../services/logs'
-import store from '../services/store'
+import store, { useAppDispatch } from '../services/store'
 
 export const TileView: FunctionComponent = ( ) => {
   // https://www.carlrippon.com/repeat-element-n-times-in-jsx/
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   useEffect( () => {
     dispatch( fetchLogs() )
