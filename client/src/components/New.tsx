@@ -3,7 +3,7 @@ import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState } from '@reduxjs/toolkit'
 
-import { fetchLogs, selectLogs, logsSelectors, select24h, makeSelectRange } from '../services/logs'
+import { fetchLogs, selectLogs, logsSelectors, makeSelectByTimestamp, select24h, makeSelectRange } from '../services/logs'
 import store, { useAppDispatch } from '../services/store'
 import { Draggable, EndMarker } from './Draggable'
 import { CLI } from './CLI-new'
@@ -50,11 +50,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const dispatch = useAppDispatch()
   const timebarRef: React.RefObject<HTMLDivElement> = useRef(null)
 
-  const sel = makeSelectRange( props.startTime.getTime(), props.endTime.getTime() )
+  const selectRange = makeSelectRange( props.startTime.getTime(), props.endTime.getTime() )
 
-  const theLogs = useSelector( sel );
-  //const theLogs = useSelector( logsSelectors.selectAll )
-  const last24  = useSelector( select24h )
+  const theLogs = useSelector( selectRange );
 
   const [ loaded, setLoaded ] = useState(false)
   const [ currentLogId, setCurrentLogId ] = useState(0)
@@ -71,8 +69,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const timespan = props.endTime.getTime() - props.startTime.getTime()
   const ratio = clientWidth / timespan
   // worst one-liner in history?
-  const playheadTimestamp = new Date( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) )
-  const time = playheadTimestamp.toLocaleString('en-US')
+  const playheadTimestamp = props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) )
+  const selectByTimestamp = makeSelectByTimestamp( playheadTimestamp )
 
   const nowOffset = ( now.getTime() - props.startTime.getTime() ) * ratio
 
@@ -199,9 +197,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
       <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
       </div>
-      <div className="clock"> { time } </div>
+      <div className="clock"> { playheadTimestamp } </div>
 
-      <EntryView logId={currentLogId} hidden={entryViewHidden} />
+      <EntryView timestamp={playheadTimestamp} hidden={false} />
     </div>
   )
 }
@@ -266,15 +264,14 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, selectLogHook, css }
   )
 }
 interface EntryViewProps {
-  logId: number
+  timestamp: number
   hidden: boolean
 }
 
-const EntryView: FunctionComponent<EntryViewProps> = ( props ) => {
+const EntryView: FunctionComponent<EntryViewProps> = ( { timestamp, hidden } ) => {
 
-  const [ hidden, toggleHidden ] = useState(false)
-
-  const log = logsSelectors.selectById( store.getState(), props.logId )
+  const sel = makeSelectByTimestamp( timestamp )
+  const log = useSelector( sel )
 
   let logIcon = ( <div className="placeholder" /> )
 
@@ -306,7 +303,7 @@ const EntryView: FunctionComponent<EntryViewProps> = ( props ) => {
 
   //<span className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes() }</span>
   return (
-    <div key={ props.logId } className="entry-view">
+    <div key={ log.id } className="entry-view">
       <div className="sector">{ logIcon }</div>
       <div className="entry-time">{ start.toLocaleString('en-US') }</div>
       <div className="entry-time">{ end.toLocaleString('en-US') }</div>

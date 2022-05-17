@@ -169,6 +169,17 @@ export const selectLast = createSelector( logsSelectors.selectAll, logs => {
   return logs[0]
 })
 
+export const makeSelectByTimestamp = (ts: number) => {
+  const sel = createSelector(
+    logsSelectors.selectAll,
+    // just using find so we can return a single instead of array
+    (logs) => logs.find( (log) => {
+      return log.timestamp < ts && (log.timestamp + log.timeSpent) > ts
+    })
+  )
+  return sel
+}
+
 // O'boy
 export const makeSelectRange = (start: number, end: number) => {
   const selector = createSelector(

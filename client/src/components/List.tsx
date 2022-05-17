@@ -25,8 +25,8 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
   function makeDummyTask() {
     let desc = faker.lorem.sentence()
-    let timestamp = new Date( Date.now() )
-    let timeLastWorked = new Date( Date.now() )
+    let timestamp = Date.now()
+    let timeLastWorked = Date.now()
     let percentageFinished = Math.floor( Math.random() * 100 )
     //let elapsedTime = "1 hour 35 minutes"
 
@@ -60,7 +60,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
       let sector = Sector.programming
       let dummyLog: Log = {
         description: desc,
-        timestamp: new Date(timestamp),
+        timestamp: timestamp,
         timeSpent: timeSpent,
         sector: sector
       }

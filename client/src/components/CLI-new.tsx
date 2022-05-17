@@ -12,7 +12,7 @@ import { createLog, selectLogs, logsSelectors } from '../services/logs'
 import { createTask } from '../services/tasks'
 
 interface CLIProps {
-  timestamp: Date 
+  timestamp: number 
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
     //toggleSpanMarker: React.FocusEventHandler<HTMLInputElement>
   toggleSpanMarker: Function
@@ -185,7 +185,7 @@ const ActionInputTwo: React.FC<ActionProps> = ( { active, formState, setFormStat
 interface LogFormProps {
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
   toggleSpanMarker: Function
-  timestamp: Date ,
+  timestamp: number,
   formState: string 
 }
 
@@ -240,7 +240,7 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
 }
 
 interface TaskFormProps {
-  timestamp: Date 
+  timestamp: number 
 }
 
 const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
@@ -248,7 +248,7 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
 
   const [description, setDesc] = useState('')
 
-  const timeLastWorked = new Date( Date.now() )
+  const timeLastWorked = Date.now()
 
   const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setDesc(e.target.value) 
