@@ -1,6 +1,6 @@
 import React, { forwardRef, ForwardRefExoticComponent, FunctionComponent, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
-import { useAppDispatch } from '../services/store'
+import { useAppDispatch, AppDispatch, useTestDispatch, useAppThunkDispatch, useTypedDispatch } from '../services/store'
 import { Hint } from './Hint'
 import { Log, Task, Sector } from '../Types'
 import { EntityState } from '@reduxjs/toolkit'
@@ -12,7 +12,7 @@ import { createLog, selectLogs, logsSelectors } from '../services/logs'
 import { createTask } from '../services/tasks'
 
 interface CLIProps {
-  timestamp: Date
+  timestamp: number 
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
     //toggleSpanMarker: React.FocusEventHandler<HTMLInputElement>
   toggleSpanMarker: Function
@@ -49,7 +49,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
         setActive(false)
         setFormState('none')
       }
-      if ( e.key == ' ' || ( e.key >= 'a' && e.key <= 'z' ) ) {
+      if ( e.key == ' ' || ( e.key >= 'a' && e.key <= 'z' ) || e.key == 'Tab' ) {
         setActive(true)
       }
     }
@@ -185,13 +185,13 @@ const ActionInputTwo: React.FC<ActionProps> = ( { active, formState, setFormStat
 interface LogFormProps {
   updateTimespan: React.ChangeEventHandler<HTMLInputElement>
   toggleSpanMarker: Function
-  timestamp: Date,
+  timestamp: number,
   formState: string 
 }
 
 const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker, updateTimespan, timestamp } ) => {
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   const [ timeSpent, setTimeSpent ] = useState(0)
   const [ textAreaActive, setTextAreaActive ] = useState(false)
@@ -205,7 +205,7 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
       timestamp: timestamp,
       timeSpent: timeSpent
     }
-    dispatch( createLog( log ) )
+    dispatch( createLog(log) )
   }
 
   const toggleOn = ( e: React.FocusEvent<HTMLInputElement> ) => {
@@ -240,13 +240,15 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
 }
 
 interface TaskFormProps {
-  timestamp: Date
+  timestamp: number 
 }
 
 const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   const [description, setDesc] = useState('')
+
+  const timeLastWorked = Date.now()
 
   const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setDesc(e.target.value) 
@@ -255,12 +257,12 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const now = new Date( Date.now() )
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
-    e.preventDefault()
+    e.preventDefault();
     let task: Task = {
       timestamp: timestamp,
+      timeLastWorked: timeLastWorked,
       percentageFinished: 0,
-      timeLastWorked: now,
-      elapsedWorkTime: 0,
+      elapsedWorkTime: 50,
       description: description
     }
     dispatch( createTask( task ) )      

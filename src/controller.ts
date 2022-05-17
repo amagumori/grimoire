@@ -120,7 +120,7 @@ export const getLogs = async ( filter?: any ) => {
     const logRepo = getRepository(Log);
 
     let logs = await logRepo.find();
-    console.log('logs on server side: ' + JSON.stringify(logs))
+    //console.log('logs on server side: ' + JSON.stringify(logs))
     return logs;
   }
 }

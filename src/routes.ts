@@ -94,7 +94,6 @@ export default [
     handler: [
       async ( req: Request, res: Response ) => {
         let logs = await getLogs()
-        console.log('received a request for logs.  logs are:\n' + logs)
         res.status(200).send( logs ) 
       }
     ]

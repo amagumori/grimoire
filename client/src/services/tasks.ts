@@ -29,6 +29,7 @@ const tasksAdapter = createEntityAdapter<Task>();
 
 // still don't fully understand why i have to put all these in extraReducers anyway.
 
+/*
 export const fetchTasks = createAsyncThunk< Task[], void, {state: TasksState}>(
   'tasks/fetchTasksStatus',
   async(_, ThunkAPI) => {
@@ -37,7 +38,25 @@ export const fetchTasks = createAsyncThunk< Task[], void, {state: TasksState}>(
     return res.data
   }
 )
+*/
 
+export const fetchTasks = createAsyncThunk(
+  'tasks/fetchTasksStatus',
+  async() => {
+    const res = await axios.get<Task[]>('/api/task')
+    return res.data
+  } 
+)
+
+export const createTask = createAsyncThunk(
+  'tasks/createTaskStatus',
+  async( task: Task ) => {
+    const res = await axios.post('/api/task', task)
+    return res.data as Task
+  }
+)
+
+/*
 export const createTask = createAsyncThunk<Task, Task, {state: TasksState}>(
   'tasks/createTaskStatus',
   async(task, ThunkAPI) => {
@@ -48,6 +67,7 @@ export const createTask = createAsyncThunk<Task, Task, {state: TasksState}>(
     return response.data.task;
   }
 );
+*/
 
 export const updateTask = createAsyncThunk<TaskUpdate, TaskUpdate, {state: TasksState} >(
   'tasks/updateTaskStatus',

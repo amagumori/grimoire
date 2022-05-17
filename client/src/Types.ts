@@ -7,10 +7,12 @@ export enum Sector {
   none = "none"
 }
 
+// working with all integer timestamps bc typeorm's date types are completely useless.
+
 export interface Log {
   id?:                number,
   description:        string,
-  timestamp:          Date,
+  timestamp:          number, 
   timeSpent:          number, // just ms for now
   sector?:            Sector,
   projectId?:         number,
@@ -22,20 +24,19 @@ export interface Project {
   name:               string,
   description:        string,
   timestamp:          number,
-  timeLastWorked:     Date,
+  timeLastWorked:     number,
   logs:               Log[]  // array of log ids
 }
 
 export interface Task {
-  id?:                number,  // made id and logs optional for now bc postgres is creating id and logs are optional
-  active:             boolean,
-  description:        string,
-  timestamp?:          Date,
-  timeLastWorked?:     Date,   
+  id?:                 number,  // made id and logs optional for now bc postgres is creating id and logs are optional
+  active:              boolean,
+  description:         string,
+  timestamp?:          number,
+  timeLastWorked?:     number
   percentageFinished?: number,
   elapsedWorkTime?:    number,
   subTasks?:           Task[] // task id
   logs?:               Log[]  // array of log ids
 }
-
 
