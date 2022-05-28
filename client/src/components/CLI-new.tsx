@@ -254,6 +254,8 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
     setDesc(e.target.value) 
   }
 
+  const now = new Date( Date.now() )
+
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
     let task: Task = {
@@ -272,6 +274,47 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
     </form>
   )
 }
+
+interface SubTaskFormProps {
+  test: string
+}
+
+
+const SubTaskForm: FunctionComponent<TaskFormProps> = ( { test } ) => {
+
+  const dispatch = useDispatch()
+
+  useEffect( () => {
+    dispatch( fetchTasks() )
+  }, [dispatch] )
+
+  const tasks = 
+
+
+
+  const [ description, setDesc ] = useState('')
+
+  const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setDesc( e.target.value )
+  }
+
+  const onSubmit = ( e: React.SyntheticEvent ) => {
+    e.preventDefault();
+    let task: Task = {
+
+    }
+    dispatch( createTask( task ) )
+  }
+
+
+  return (
+    <form onSubmit={ onSubmit }>
+      <Hint options={sectorHints} allowTabFill onFill={handleFill} >
+        <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
+      </Hint>
+      <input autoFocus className="task-description" onChange={descChange} value={description}></input>
+    </form>
+  )
 
   /*
 interface TimespanInputProps {

@@ -35,11 +35,11 @@ export class Project {
   @Column("text")
   description!: string;
 
-  @Column("integer")
-  percentageFinished!: number;
-
   @Column( { type: 'enum', enum: Sector })
   sector!: Sector;
+
+  @OneToMany( type => Task, task => task.project )
+  tasks?: Task[];
 
   @OneToMany( type => Log, log => log.project )
   logs?: Log[];
@@ -50,6 +50,9 @@ export class Project {
 export class Task {
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Column()
+  active!: boolean;
 
   @CreateDateColumn()
 
@@ -73,6 +76,12 @@ export class Task {
 
   @Column("bigint")
   elapsedWorkTime!: number;
+
+  @ManyToOne( () => Project, project => project.tasks )
+  project?: Project;
+
+  @OneToMany( () => Task, task => task.subTasks )
+  subTasks?: Task[];
 
   @OneToMany( type => Log, log => log.task )
   logs?: Log[];
