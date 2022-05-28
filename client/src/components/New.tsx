@@ -17,7 +17,7 @@ export const TimeBarContainer: FunctionComponent = () => {
   const day = new Date( now - 86400000 )
 
   const [ start, setStart ] = useState(new Date(now))
-  const [ end, setEnd ] = useState( new Date(now) )
+  const [ end, setEnd ] = useState( new Date(day) )
 
   const setDay = (e : React.MouseEvent<HTMLButtonElement> ) => { 
     setStart( day ) 
@@ -69,7 +69,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const timespan = props.endTime.getTime() - props.startTime.getTime()
   const ratio = clientWidth / timespan
   // worst one-liner in history?
-  const playheadTimestamp = props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) )
+  const playheadTimestamp = Math.trunc( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) )
+
   const selectByTimestamp = makeSelectByTimestamp( playheadTimestamp )
 
   const nowOffset = ( now.getTime() - props.startTime.getTime() ) * ratio

@@ -4,8 +4,8 @@ import faker from 'faker'
 import { Task, Log, Project, Sector } from '../Types'
 import { useDispatch, useSelector, connect } from 'react-redux'
 
-import { tasksSelectors, selectTasks, createTask, fetchTasks } from '../services/tasks'
-import { logsSelectors, selectLogs, fetchLogs, createLog } from '../services/logs'
+import { tasksSelectors, createTask, fetchTasks } from '../services/tasks'
+import { logsSelectors, fetchLogs, createLog } from '../services/logs'
 import { projectsSelectors } from '../services/projects'
 import store, { useAppDispatch } from '../services/store'
 import { TaskItem, LogItem, ProjectItem } from './ListItem'
@@ -32,6 +32,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
     let elapsedTime = 35
 
     let dummyTask: Task = {
+      active: true,
       description: desc,
       timestamp: timestamp,
       timeLastWorked: timeLastWorked,
@@ -92,9 +93,7 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
   const [listType, logs] = useState(0)
   //dispatch(fetchTasks())
 
-  //const tasksFromSelector = useSelector(selectTasks)
-  //const theTasks = useSelector(selectTasks)
-  const theLogs = useSelector(selectLogs)
+  const theLogs = useSelector(logsSelectors.selectAll)
   const theTasks = useSelector(tasksSelectors.selectAll); 
   
   useEffect( () => {

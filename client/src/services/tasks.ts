@@ -1,4 +1,9 @@
-import { createAsyncThunk, createEntityAdapter, createSlice, configureStore } from '@reduxjs/toolkit'
+import { createAsyncThunk, 
+         createSelector, 
+         createEntityAdapter, 
+         createSlice, 
+         configureStore } from '@reduxjs/toolkit'
+
 import axios from 'axios'
 import store, { AppThunk } from './store'
 
@@ -137,10 +142,24 @@ const getTaskById = createAsyncThunk(
 
 type RootState = ReturnType<typeof store.getState>
 
+type Return = (state: RootState) => Task[] | undefined
+
 export const tasksSelectors = tasksAdapter.getSelectors<RootState>(
   (state) => state.tasks
 )
 
-export const selectTasks = (state: RootState) => state.tasks
+export const selectActiveTasks = (): Return => createSelector(
+  tasksSelectors.selectAll,
+  (tasks) => tasks.filter( (task) => task.active)
+)
+
+type ReturnTitles = ( state: RootState ) => String[] | undefined
+
+export const selectActiveTaskTitles = createSelector(
+  tasksSelectors.selectAll,
+  (tasks) => tasks.map( (task) => { if (task.active && task.description ) return task.description } )
+)
+
+//export const selectTasks = (state: RootState) => state.tasks
 
 export default tasksSlice.reducer

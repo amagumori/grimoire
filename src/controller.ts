@@ -66,8 +66,9 @@ export const createTask = async ( body: any ) => {
   console.log(body)
 
   const taskRepo = getRepository(Task);
-  let { description, elapsedWorkTime, percentageFinished, timeLastWorked, timestamp } = body;
+  let { active, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, description } = body;
   let task = new Task();
+  task.active = active;
   task.description = description;
   console.log('desc: ' + description)
   task.timestamp = timestamp;

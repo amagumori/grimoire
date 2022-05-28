@@ -45,7 +45,7 @@ export const LogItem: FunctionComponent<LogProps> = ( {id, description, timestam
   ) 
 }
 
-export const ProjectItem: FunctionComponent<ProjectProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
+export const ProjectItem: FunctionComponent<ProjectProps> = ( {id, description, timestamp, timeLastWorked, logs } ) => {
   
   return (
     <div className="taskEntry" key={ id } >

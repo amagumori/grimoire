@@ -65,16 +65,16 @@ export class Task {
 
   // i'm going back to int bc trying to store Date objects
   // literally just creates problems, what's stored is a "fake" Date object
-  @Column("timestamptz") 
-  timestamp!: Date;
+  @Column("bigint") 
+  timestamp!: number;
 
-  @Column("timestamptz") 
-  timeLastWorked!: Date;
+  @Column("bigint") 
+  timeLastWorked!: number;
 
   @Column("integer")
   percentageFinished!: number;
 
-  @Column("integer")
+  @Column("bigint")
   elapsedWorkTime!: number;
 
   @ManyToOne( () => Project, project => project.tasks )
@@ -101,7 +101,7 @@ export class Log {
 
   @DeleteDateColumn()
 
-  @Column("timestamptz")
+  @Column("bigint")
   timestamp!: number;
 
   // this may or may not actually work in TypeORM
@@ -109,7 +109,7 @@ export class Log {
   //timeSpent!: string;
   //
   // i'm just saying fuck it and storing minutes for now.
-  @Column('integer')
+  @Column('bigint')
   timeSpent!: number;
 
   @Column( { type: 'enum', enum: Sector } )

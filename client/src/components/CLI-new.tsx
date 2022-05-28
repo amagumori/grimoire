@@ -1,6 +1,6 @@
 import React, { forwardRef, ForwardRefExoticComponent, FunctionComponent, useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux'
-import { useAppDispatch, AppDispatch, useTestDispatch, useAppThunkDispatch, useTypedDispatch } from '../services/store'
+import { useSelector } from 'react-redux'
+import { useAppDispatch } from '../services/store'
 import { Hint } from './Hint'
 import { Log, Task, Sector } from '../Types'
 import { EntityState } from '@reduxjs/toolkit'
@@ -9,7 +9,7 @@ import '../css/breathe.css'
 import { HiTerminal,  HiCode } from 'react-icons/hi'
 import { IoColorPaletteSharp } from 'react-icons/io5'
 import { createLog, selectLogs, logsSelectors } from '../services/logs'
-import { createTask } from '../services/tasks'
+import { createTask, fetchTasks, tasksSelectors, selectActiveTasks, selectActiveTaskTitles } from '../services/tasks'
 
 interface CLIProps {
   timestamp: number 
@@ -31,7 +31,7 @@ const sectorHints = [
   
 export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, toggleSpanMarker }) => {
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   //const actionRef = useRef<MutableRefObject<HTMLInputElement | undefined>>()
   //const actionRef = useRef<HTMLInputElement>(null)
@@ -132,6 +132,11 @@ const ActionInputTwo: React.FC<ActionProps> = ( { active, formState, setFormStat
       }
       case "task": {
         setFormState("task")
+        setInputValue("")
+        break
+      }
+      case "subtask": {
+        setFormState("subtask")
         setInputValue("")
         break
       }
@@ -259,6 +264,7 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
     let task: Task = {
+      active: true,
       timestamp: timestamp,
       timeLastWorked: timeLastWorked,
       percentageFinished: 0,
@@ -276,172 +282,70 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
 }
 
 interface SubTaskFormProps {
-  test: string
+  timestamp: number
 }
 
 
-const SubTaskForm: FunctionComponent<TaskFormProps> = ( { test } ) => {
+const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   useEffect( () => {
     dispatch( fetchTasks() )
   }, [dispatch] )
 
-  const tasks = 
+  var taskNamesArray: Array<string> = []
+  const taskNames = useSelector( selectActiveTaskTitles )
 
+  taskNames.map( ( task ) => {
+    if ( task !== undefined ) {
+      taskNamesArray.push(task)
+    }
+  })
 
-
+  const [ inputValue, setInputValue ] = useState('')
   const [ description, setDesc ] = useState('')
+
+  const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setInputValue( e.target.value )
+  }
 
   const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setDesc( e.target.value )
   }
 
+  const handleFill = ( word: String | Object | undefined ) => {
+    console.log('phooey')    
+  }
+
+
+  const timeLastWorked = Date.now()
+
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
     let task: Task = {
-
+      active: true,
+      timestamp: timestamp,
+      timeLastWorked: timeLastWorked,
+      percentageFinished: 0,
+      elapsedWorkTime: 50,
+      description: description
     }
-    dispatch( createTask( task ) )
+    dispatch( createTask( task ) )      
   }
 
 
   return (
     <form onSubmit={ onSubmit }>
-      <Hint options={sectorHints} allowTabFill onFill={handleFill} >
-        <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
+      <Hint options={taskNamesArray} allowTabFill onFill={handleFill} >
+        <input autoFocus className="cli-input" value={inputValue} onChange={onChange}></input>
       </Hint>
       <input autoFocus className="task-description" onChange={descChange} value={description}></input>
     </form>
   )
 
-  /*
-interface TimespanInputProps {
-  formState: string
-  updateTimespan: React.ChangeEventHandler<HTMLInputElement>
 }
 
-const TimespanInput: React.FC<TimespanInputProps> = ( { formState, updateTimespan } ) => { 
-
-  const timespanInputRef = React.createRef<HTMLInputElement>()
-
-  // lol
-
-  if ( formState != 'timespan' ) return null
-
-  if ( formState == 'timespan' ) {
-    timespanInputRef.current && timespanInputRef.current.focus() 
-  }
-
-  interface InputProps {
-    test: string 
-  }
-
-  const InputField = React.forwardRef<HTMLInputElement, InputProps>(( { test: string } , fwdRef: React.ForwardedRef<HTMLInputElement>) : JSX.Element => {
-    return ( <input className="time-spent" onChange={updateTimespan} ></input> )
-  })
-
-  return ( 
-    <div className="time-spent-wrapper">
-      <InputField test='foo'/>
-    </div>
-  )
-}
-   */
-
-  /* 
-interface ProjectFormProps {
-}
-
-const ProjectForm: FunctionComponent = ( {} ) => {
-=======
-  /*
-interface ProjectFormProps {
-}
-
-const ProjectForm: FunctionComponent = (  ) => {
-  const onSubmit = ( e: React.SyntheticEvent ) => {
-
-  }
-
-
-}
-   */
-
-
-/*
-interface ActionProps {
-  active: boolean
-  formState: string 
-  setFormState: Function
-  innerRef: React.RefObject<HTMLInputElement>
-  setFormState: Function 
-}
- */
-
-  /*
-class ActionInput extends React.Component {
-
-  constructor( props: ActionProps ) {
-    super(props);
-    this.state = {
-      actionState: "",
-      inputValue: ""
-    }
-  }
-
-  onChange(e: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ inputValue: e.target.value });
-
-    switch( inputValue ) {
-      case "log": {
-        this.props.setFormState("log")
-        this.setState({ inputValue: "" });
-        break
-      }
-      case "task": {
-        this.props.setFormState("task")
-        this.setState({ inputValue: "" });
-        break
-      }
-      case "project": {
-        this.props.setFormState("project")
-        this.setState({ inputValue: "" });
-        break
-      }
-      default: {
-        // set form state
-        break
-      }
-    }
-  }
-
-  render() {
-    if ( !this.props.active ) return null;
-
-    if ( actionState === 'log' ) {
-      return (
-        <div className="log-button">LOG</div>
-      )
-    } 
-    if ( actionState === 'task' ) {
-      return (
-        <div className="log-button">TASK</div>
-      )
-    } 
-    if ( actionState === 'project' ) {
-      return (
-        <div className="log-button">PROJECT</div>
-      )
-    }
-
-    return (
-      <input className="cli-input" ref={this.props.innerRef} value={this.state.inputValue} onChange={this.onChange}></input>
-    )
-  }
-}
-   */
 
 interface SectorProps {
   active: boolean
@@ -575,3 +479,4 @@ const SectorIcon: FunctionComponent<SectorIconProps> = ( { active, sector } ) =>
   return null;
   
 }
+
