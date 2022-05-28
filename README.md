@@ -1,4 +1,6 @@
-# tt_new
+# grimoire
+
+![screenshot](https://i.ibb.co/fSkf7nb/grimoire-screenshot.png)
 
 ## design
 

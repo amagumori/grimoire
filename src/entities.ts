@@ -104,11 +104,6 @@ export class Log {
   @Column("bigint")
   timestamp!: number;
 
-  // this may or may not actually work in TypeORM
-  //@Column("interval")
-  //timeSpent!: string;
-  //
-  // i'm just saying fuck it and storing minutes for now.
   @Column('bigint')
   timeSpent!: number;
 

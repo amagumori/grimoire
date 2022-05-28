@@ -67,42 +67,22 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   const now = new Date( Date.now() )
   const timespan = props.endTime.getTime() - props.startTime.getTime()
-  const ratio = clientWidth / timespan
-  // worst one-liner in history?
-  const playheadTimestamp = Math.trunc( props.startTime.getTime() + ( ratio * ( playheadPos - clientOffset ) ) )
+  const msToPixRatio = clientWidth / timespan
 
+  const pixToMsRatio = timespan / clientWidth
+  // worst one-liner in history?
+  const playheadTimestamp = Math.trunc( props.startTime.getTime() + ( pixToMsRatio * ( playheadPos - clientOffset ) ) )
   const selectByTimestamp = makeSelectByTimestamp( playheadTimestamp )
 
-  const nowOffset = ( now.getTime() - props.startTime.getTime() ) * ratio
+  const nowOffset = ( now.getTime() - props.startTime.getTime() ) * msToPixRatio
 
   const updateTimeSpent = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     let val
     if ( !val ) val = 0
     val = parseInt( e.target.value ) * 60000
-    val *= ratio
+    val *= msToPixRatio 
     setEndMarker( Math.trunc(val) ) 
   }
-
-  /*
-  const toggleCLI = ( e: React.KeyboardEvent ) => {
-    if ( !logFormActive ) {
-      if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'l' ) {
-      setLogFormActive(true);
-      }
-    }
-    if ( logFormActive ) {
-      if ( e.key === 'Escape' ) {
-        setLogFormActive(false);
-      }
-    }
-  }
-   */
-
-    /*
-  const toggleLogFormActiveInput = ( e: React.FocusEvent<HTMLInputElement> ) => {
-    setLogFormActive(!logFormActive)
-  }
-     */
 
   useEffect( () => {
     dispatch( fetchLogs() )
@@ -113,12 +93,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     }
   }, [dispatch])
 
-    /*
-  let logsToShow = theLogs.filter( (log) => {
-    // take this out to see if it will compare stored Date objects as "real" ones
-    return log.timestamp > props.startTime.getTime() && log.timestamp < props.endTime.getTime()
-  })
-  */
+  let d = new Date(playheadTimestamp).toLocaleString('en-US')
 
   let offset = 0
   const timeRatio = (time: number) => { return ( time / timespan ) }
@@ -139,53 +114,6 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     return ( <TimeBarEntry id={log.id ? log.id : -1 } selectLogHook={setCurrentLogId} css={css} /> )
   })
 
-    /*
-  const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
-    let nextLog = logs[index+1]
-    let prevLog = logs[index-1]
-
-    // this is awful.
-    let currTimestamp = new Date( log.timestamp ).getTime()
-
-    if ( prevLog == undefined ) {
-      offset += timeRatio( currTimestamp - props.startTime.getTime() )
-    }
-
-    if ( nextLog != undefined && prevLog != undefined ) {
-      if ( offset <= timeRatio( currTimestamp ) ) {
-        return ( <div className="empty-entry"></div> )
-      }
-      let prevTimestamp = new Date( prevLog.timestamp ).getTime()
-      let unloggedTimeMs = currTimestamp - ( prevTimestamp + prevLog.timeSpent )
-      let unloggedPercentage = timeRatio(unloggedTimeMs)
-      let prevLoggedWidth = timeRatio(prevLog.timeSpent)
-      let loggedPercentage = timeRatio(log.timeSpent)
-
-      offset += loggedPercentage + unloggedPercentage
-
-      let css = {
-        width: loggedPercentage,
-        left: offset,
-        backgroundColor: `rgba(0, ${log.timeSpent}, ${log.timeSpent}, ${255 * ( log.timeSpent / 3600000 )})`
-      }
-
-      // quick hack until figure out a better way to use serial ids that are only backend side
-      return ( <TimeBarEntry id={log.id ? log.id : -1} selectLogHook={setCurrentLogId} css={css} /> )
-
-    } else {
-      let loggedPercentage = timeRatio( log.timeSpent )
-      let css = {
-        width: loggedPercentage,
-        left: offset,
-        backgroundColor: `rgba(0, ${log.timeSpent}, 180, 255)`
-      }
-      offset += timeRatio( currTimestamp ) + loggedPercentage
-
-      return ( <TimeBarEntry id={log.id ? log.id : -1} selectLogHook={setCurrentLogId} css={css} /> )
-    }
-  })
-  */
-
   return (
     <div className="timebar-wrapper">
       <div>CURRENT LOG ID: { currentLogId }</div>
@@ -198,7 +126,11 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
       <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
       </div>
-      <div className="clock"> { playheadTimestamp } </div>
+      <div className="clock"> { d } </div>
+      <div className="clock"> { pixToMsRatio } </div>
+      <div className="clock"> { playheadPos } </div>
+      <div className="clock"> { msToPixRatio } </div>
+      <div className="clock"> { timespan } </div>
 
       <EntryView timestamp={playheadTimestamp} hidden={false} />
     </div>
