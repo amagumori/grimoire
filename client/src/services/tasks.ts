@@ -56,30 +56,17 @@ export const createTask = createAsyncThunk(
   }
 )
 
-/*
-export const createTask = createAsyncThunk<Task, Task, {state: TasksState}>(
-  'tasks/createTaskStatus',
-  async(task, ThunkAPI) => {
-    // doing this to circumvent what seems to be a bug in Axios itself as of 0.23.0
-    const response: any = await axios.post('/api/task', task);
-    console.log('res: ' + JSON.stringify(response))
-    //return task;
-    return response.data.task;
-  }
-);
-*/
-
-export const updateTask = createAsyncThunk<TaskUpdate, TaskUpdate, {state: TasksState} >(
+export const updateTask = createAsyncThunk(
   'tasks/updateTaskStatus',
-  async ( updatedTask, ThunkAPI ) => {
+  async ( updatedTask: Task ) => {
     const response = await axios.put(`/api/task/${updatedTask.id}`, updatedTask);
     return updatedTask;
   }
 )
 
-export const removeTask = createAsyncThunk<number, number, { state: TasksState}> (
+export const removeTask = createAsyncThunk(
   'tasks/removeTaskStatus',
-  async ( taskId, ThunkAPI ) => {
+  async ( taskId: number ) => {
     const response = await axios.delete(`/api/task/${taskId}`);
     return taskId;
   }
@@ -124,16 +111,6 @@ export const tasksSlice = createSlice({
   }
 
 });
-
-/*
-const getTaskById = createAsyncThunk(
-  'tasks/getTaskByIdStatus',
-  async ( taskId ) => {
-    const response = await axios.get(`/api/tasks/${taskId}`);
-    return response;
-  }
-)
-*/
 
 type RootState = ReturnType<typeof store.getState>
 
