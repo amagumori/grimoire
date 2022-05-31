@@ -20,7 +20,7 @@ interface LogUpdate {
 const logsAdapter = createEntityAdapter<Log>({
   // js at its finest right here.  because this is deserialized JSON
   // they might appear to be Date objects and Date typed but don't have methods
-  sortComparer: (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  sortComparer: (a, b) => a.timestamp - b.timestamp 
 });
 
 // read this, dumbass!  your imperative ass needs to do everything immutably and
@@ -164,6 +164,7 @@ export const select24h = createSelector( allLogs, logs => {
   })
 })
 
+
 export const selectLast = createSelector( logsSelectors.selectAll, logs => {
   logs.sort( (a, b) => new Date( b.timestamp ).getTime() - new Date( a.timestamp ).getTime())
   return logs[0]
@@ -174,7 +175,9 @@ export const makeSelectByTimestamp = (ts: number) => {
     logsSelectors.selectAll,
     // just using find so we can return a single instead of array
     (logs) => logs.find( (log) => {
-      return log.timestamp < ts && (log.timestamp + log.timeSpent) > ts
+      //return log.timestamp < ts && (log.timestamp + log.timeSpent) > ts
+      // this will be our "close enough" constant for testing - 150 seconds
+      return Math.abs(log.timestamp - ts) < 150000;
     })
   )
   return sel
@@ -186,7 +189,7 @@ export const makeSelectRange = (start: number, end: number) => {
     logsSelectors.selectAll,
     (logs) => logs.filter( (log) => {
       // this is disgusting and fills me with rage.  thanks typeORM!
-      return new Date(log.timestamp).getTime() > start && new Date(log.timestamp).getTime() < end 
+      return log.timestamp > start && log.timestamp < end 
     })
   );
   return selector;

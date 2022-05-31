@@ -68,8 +68,8 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const now = new Date( Date.now() )
   const timespan = props.endTime.getTime() - props.startTime.getTime()
   const msToPixRatio = clientWidth / timespan
-
   const pixToMsRatio = timespan / clientWidth
+
   // worst one-liner in history?
   const playheadTimestamp = Math.trunc( props.startTime.getTime() + ( pixToMsRatio * ( playheadPos - clientOffset ) ) )
   const selectByTimestamp = makeSelectByTimestamp( playheadTimestamp )
@@ -99,11 +99,11 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const timeRatio = (time: number) => { return ( time / timespan ) }
 
   const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
-    let currentTs = new Date( log.timestamp ).getTime()
-    let offset = timeRatio( currentTs - props.startTime.getTime() )
+
+    let offset = timeRatio( log.timestamp - props.startTime.getTime() )
     offset *= clientWidth
-    //let perc = timeRatio( log.timeSpent )   // should be ms as with everything now.
     let perc = `${timeRatio(log.timeSpent) * 100 }%`
+    
     let rand0 = Math.random()
     let rand1 = Math.random()
     let css = {
@@ -116,7 +116,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
 
   return (
     <div className="timebar-wrapper">
-      <div>CURRENT LOG ID: { currentLogId }</div>
+      <div>CURRENT timestamp: {playheadTimestamp}</div>
       <CLI updateTimespan={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } timestamp={ playheadTimestamp}></CLI>
       <div className="timebar" ref={timebarRef} >
 
@@ -125,14 +125,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ nowOffset } />
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
       <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
-      </div>
-      <div className="clock"> { d } </div>
-      <div className="clock"> { pixToMsRatio } </div>
-      <div className="clock"> { playheadPos } </div>
-      <div className="clock"> { msToPixRatio } </div>
-      <div className="clock"> { timespan } </div>
-
-      <EntryView timestamp={playheadTimestamp} hidden={false} />
+    </div>
+      <div className="clock">{pixToMsRatio} : {msToPixRatio} </div>
+      <EntryView id={currentLogId} hidden={false} />
     </div>
   )
 }
@@ -197,14 +192,17 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, selectLogHook, css }
   )
 }
 interface EntryViewProps {
-  timestamp: number
+  id: number
   hidden: boolean
 }
 
-const EntryView: FunctionComponent<EntryViewProps> = ( { timestamp, hidden } ) => {
+const EntryView: FunctionComponent<EntryViewProps> = ( { id, hidden } ) => {
 
+  /* do "drag-auto-select" later
   const sel = makeSelectByTimestamp( timestamp )
   const log = useSelector( sel )
+   */
+  const log = logsSelectors.selectById( store.getState(), id )
 
   let logIcon = ( <div className="placeholder" /> )
 
@@ -230,16 +228,19 @@ const EntryView: FunctionComponent<EntryViewProps> = ( { timestamp, hidden } ) =
 
   if ( hidden ) return null
 
-  // this is just insane
-  let start = new Date(log.timestamp)
-  let end = new Date( start.getTime() + ( log.timeSpent ) )
+  // this is just insane.  js at its absolute finest.  these are literally typed as numbers.  everywhere.
+  /*
+  let start = new Date(parseInt(log.timestamp))
+  let end = new Date( (parseInt(log.timestamp) + parseInt(log.timeSpent) ) )
+  */
 
   //<span className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes() }</span>
   return (
     <div key={ log.id } className="entry-view">
+      <div> { JSON.stringify(log) } </div>
       <div className="sector">{ logIcon }</div>
-      <div className="entry-time">{ start.toLocaleString('en-US') }</div>
-      <div className="entry-time">{ end.toLocaleString('en-US') }</div>
+      <div className="entry-time">{ new Date(+log.timestamp).toLocaleString('en-US') }</div>
+      <div className="entry-time">{ log.timeSpent }</div>
       <div className="entry-description">{log.description}</div>
     </div>
   )

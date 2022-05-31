@@ -45,6 +45,19 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    fill: #999;
+  } 
+  50% {
+    fill: #e68183;
+  } 
+  100% {
+    fill: #999;
+  }
+}
+
+
 .date-box {
 
 }
@@ -228,6 +241,7 @@ li {
 .taskEntry {
   display: inline-flex;
   width: 100%;
+  animation: fadein 1.3s;
 }
 
 .taskEntry:hover {
@@ -404,33 +418,54 @@ h1 {
 }
 
 .cli {
-  display: flex;
-  flex-direction: row;
+  display: inline-block;
+}
+
+.log-form {
+  display: inline-flex;
+}
+
+.log-button {
+  width: 2em;
+}
+
+.sector-input-wrapper {
+  color: #fff1cb;
+}
+
+/*
+.sector-input-wrapper:focus {
+  background-color: #7b9fad;
+}
+*/
+
+.sector {
+  vertical-align: middle;
+  font-size: 18px;
+  color: #B8685A;
+  margin: 0px 6px 0px 6px;
+}
+
+.bg-blip {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.sector-input {
+  color: #fff1cb;
+}
+
+.time-spent-wrapper {
+  width: 12em;
+  display: inline-block;
+}
+
+.time-spent-wrapper:focus {
+  background-color: #7b9fad;
+  color: #fff1cb;
 }
 
 .new-cli-wrapper > i {
   vertical-align: middle;
-}
-
-.sector-input-wrapper {
-  white-space: nowrap;
-  display: inline-block;
-}
-
-.hidden {
-  display: none;
-}
-
-#sector-input {
-  
-}
-
-.time-spent-wrapper {
-  display: inline-block;
-}
-
-.time-spent {
-
 }
 
 .hidden {

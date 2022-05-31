@@ -72,7 +72,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
     if ( formState === 'task' ) {
       //<TaskForm />
       return (
-        <div className="new-cli-wrapper breathe">
+        <div className="cli breathe">
           <TaskForm timestamp={timestamp} />
         </div> 
       )
@@ -81,7 +81,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
     if ( formState === 'project' ) {
       // <ProjectForm />
       return (
-        <div className="new-cli-wrapper breathe">
+        <div className="cli breathe">
           <ActionInput active={false} formState={formState} setFormState={setFormState} />
           <ProjectForm />
         </div> 
@@ -94,7 +94,7 @@ export const CLI: FunctionComponent<CLIProps> = ( { timestamp, updateTimespan, t
   const activeForm = form(formState)
 
   return (
-    <div className="new-cli-wrapper breathe">
+    <div className="cli breathe">
       <ActionInputTwo active={active} formState={formState} setFormState={setFormState} />
       {logIcon}
       {activeForm}
@@ -214,6 +214,16 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     dispatch( createLog(log) )
   }
 
+  const submitForm = () => {
+    let log: Log = {
+      description: description,
+      sector: sector,
+      timestamp: timestamp,
+      timeSpent: timeSpent
+    }
+    dispatch( createLog(log) )
+  }
+
   const toggleOn = ( e: React.FocusEvent<HTMLInputElement> ) => {
     toggleSpanMarker(true)
   }
@@ -225,8 +235,25 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
   const setTimespan = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     let t = parseInt(e.target.value)
     updateTimespan(e)
-    setTimeSpent(t)
+    setTimeSpent(t * 60000) // in minutes
+
+    setTextAreaActive(true)
   }
+
+  const timeSpentKeyUp = ( e: React.KeyboardEvent<HTMLInputElement> ) => {
+    if ( e.key === 'Enter' ) {
+      // good lord.
+      submitForm()
+    }
+  }
+
+  const textAreaKeyup = ( e: React.KeyboardEvent<HTMLTextAreaElement> ) => {
+    if ( e.key === 'Enter' ) {
+      // good lord.
+      submitForm()
+    }
+  }
+
 
   // now need to make it update timespan so we can create log
 
@@ -236,9 +263,9 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
       <form className="log-form" onSubmit={ onSubmit }>
         <SectorInput active={true} sectorValue={sector} setSector={setSector} />
         <div className="time-spent-wrapper">
-          <input className="time-spent" onChange={setTimespan} onFocus={toggleOn} onBlur={toggleOff}></input>
+          <input className="time-spent" onKeyUp={timeSpentKeyUp} onChange={setTimespan} onFocus={toggleOn} onBlur={toggleOff}></input>
         </div>
-        { textAreaActive === true ? <textarea className="log-description" /> : null }
+        { textAreaActive === true ? <textarea onKeyUp={textAreaKeyup} className="log-description" /> : null }
       </form>
     )
 
@@ -304,12 +331,10 @@ const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
     }
   })
   
-  let timestamp = Date.now()
   let timeLastWorked = Date.now()
 
   const [ inputValue, setInputValue ] = useState('')
   const [ description, setDesc ] = useState('')
-  const [ inputValue, setInputValue ] = useState('')
   
   const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setInputValue( e.target.value )
@@ -321,10 +346,6 @@ const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
 
   const handleFill = ( word: String | Object | undefined ) => {
     console.log('phooey')    
-  }
-
-  const handleFill = ( ) => {
-    console.log('bepp')
   }
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
@@ -450,16 +471,27 @@ const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, set
   }
 
   if ( !active ) return null;
-
-  return (
-    <span className="sector" >
-      <div className={ sectorIsValid ? "hidden" : "sector-input-wrapper" } > 
+  
+  /*return (
+    <div className="sector" >
+      <div className="sector-input-wrapper">
         <Hint options={sectorHints} allowTabFill onFill={handleFill} >
           <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
         </Hint>
       </div>
       <SectorIcon active={sectorIsValid} sector={sectorValue} />
-    </span>
+    </div>
+  )
+  */
+
+  //<div className={ sectorIsValid ? "hidden" : "sector-input-wrapper" } > 
+  return (
+    <div className="sector" >
+      <Hint options={sectorHints} allowTabFill onFill={handleFill} >
+        <input autoFocus className="sector-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
+      </Hint>
+      <SectorIcon active={sectorIsValid} sector={sectorValue} />
+    </div>
   )
 
 }
