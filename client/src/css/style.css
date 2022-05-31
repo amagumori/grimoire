@@ -33,6 +33,18 @@
   }
 }
 
+@keyframes movebg {
+  0% {
+    background-position: 0px 1px 0px 1px;
+  } 
+  50% {
+    background-position: 0px 11px 0px 11px;
+  } 
+  100% {
+    background-position: 0px 0px 0px 0px;
+  }
+}
+
 .date-box {
 
 }
@@ -119,10 +131,13 @@
 }
 
 body {
+  background-color: #2a363b;
   color: #bbb;
   font: 0.75em "Didact Gothic", sans-serif;
-  animation: fadein 1.5s;
-  background-image: url("bg.svg"); background-repeat: repeat;
+  animation: movebg 8s;
+  background-image: url("bg.svg"), url("bg.svg"); 
+  background-repeat: repeat, repeat;
+  background-position: 0px 1px 0px 1px;
   background-blend-mode: difference;
 }
 
@@ -386,6 +401,11 @@ h1 {
   width: 100%;
   color: #f8e8f8;
   white-space: nowrap;
+}
+
+.cli {
+  display: flex;
+  flex-direction: row;
 }
 
 .new-cli-wrapper > i {

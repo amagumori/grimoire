@@ -9,7 +9,7 @@ import '../css/breathe.css'
 import { HiTerminal,  HiCode } from 'react-icons/hi'
 import { IoColorPaletteSharp } from 'react-icons/io5'
 import { createLog, selectLogs, logsSelectors } from '../services/logs'
-import { createTask } from '../services/tasks'
+import { createTask, fetchTasks } from '../services/tasks'
 
 interface CLIProps {
   timestamp: number 
@@ -259,6 +259,7 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
     let task: Task = {
+      active: true,
       timestamp: timestamp,
       timeLastWorked: timeLastWorked,
       percentageFinished: 0,
@@ -280,28 +281,42 @@ interface SubTaskFormProps {
 }
 
 
-const SubTaskForm: FunctionComponent<TaskFormProps> = ( { test } ) => {
+const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { test } ) => {
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   useEffect( () => {
     dispatch( fetchTasks() )
   }, [dispatch] )
 
-  const tasks = 
-
-
+  //const tasks = 
+  let timestamp = Date.now()
+  let timeLastWorked = Date.now()
 
   const [ description, setDesc ] = useState('')
+  const [ inputValue, setInputValue ] = useState('')
+  
+  const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setDesc( e.target.value )
+  }
 
   const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setDesc( e.target.value )
   }
 
+  const handleFill = ( ) => {
+    console.log('bepp')
+  }
+
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
     let task: Task = {
-
+      active: true,
+      timestamp: timestamp,
+      timeLastWorked: timeLastWorked,
+      percentageFinished: 0,
+      elapsedWorkTime: 50,
+      description: description
     }
     dispatch( createTask( task ) )
   }
@@ -310,12 +325,13 @@ const SubTaskForm: FunctionComponent<TaskFormProps> = ( { test } ) => {
   return (
     <form onSubmit={ onSubmit }>
       <Hint options={sectorHints} allowTabFill onFill={handleFill} >
-        <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
+        <input autoFocus className="cli-input" value={inputValue} onChange={onChange}></input>
       </Hint>
       <input autoFocus className="task-description" onChange={descChange} value={description}></input>
     </form>
   )
 
+}
   /*
 interface TimespanInputProps {
   formState: string

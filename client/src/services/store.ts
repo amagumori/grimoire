@@ -8,7 +8,7 @@ import projectsReducer from './projects'
 import cliReducer from './cli'
 
 export const rootReducer = combineReducers({
-  cli: cliReducer,
+  //cli: cliReducer,
   tasks: tasksReducer,
   logs:  logsReducer,
   projects: projectsReducer

@@ -32,6 +32,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
     let elapsedTime = 35
 
     let dummyTask: Task = {
+      active: true,
       description: desc,
       timestamp: timestamp,
       timeLastWorked: timeLastWorked,

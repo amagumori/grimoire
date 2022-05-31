@@ -13,16 +13,25 @@ type TaskProps = Task
 type ProjectProps = Project 
 type LogProps = Log 
 
-export const TaskItem: FunctionComponent<TaskProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
+export const TaskItem: FunctionComponent<TaskProps> = ( {id, active, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
 
-  let month = 0
-  let day = 0
+  const stamp = new Date()
+  let month = stamp.getMonth() + 1
+  let day   = stamp.getDate()
 
-  if ( timestamp != undefined ) {
-    month = new Date( timestamp ).getMonth()
-    day = new Date( timestamp ).getDate() 
+  if ( timestamp != undefined && active === true ) {
+    stamp.setTime(timestamp)
+    month = stamp.getMonth() + 1
+    day = stamp.getDate()
+    // this is insanely gross
+  } else {
+    return null;
   }
 
+  if ( !active ) return null;
+
+  // lol
+  
   return (
     <div className="taskEntry" key={ id } >
       <div className="date">
@@ -32,6 +41,7 @@ export const TaskItem: FunctionComponent<TaskProps> = ( {id, description, timest
       <div className="task-name"> { description } </div>
     </div>
   ) 
+  
 }
 
       //<div className="task-date"> { timestamp } </div>
@@ -45,7 +55,7 @@ export const LogItem: FunctionComponent<LogProps> = ( {id, description, timestam
   ) 
 }
 
-export const ProjectItem: FunctionComponent<ProjectProps> = ( {id, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
+export const ProjectItem: FunctionComponent<ProjectProps> = ( {id, description, timestamp, timeLastWorked, logs } ) => {
   
   return (
     <div className="taskEntry" key={ id } >
