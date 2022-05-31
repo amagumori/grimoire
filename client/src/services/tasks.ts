@@ -56,14 +56,16 @@ export const fetchTasks = createAsyncThunk(
 export const createTask = createAsyncThunk(
   'tasks/createTaskStatus',
   async( task: Task ) => {
-    const res = await axios.post('/api/task', task)
-    return res.data as Task
+    const res: any = await axios.post('/api/task', task)
+    return res.data.task as Task
   }
 )
 
 export const updateTask = createAsyncThunk(
   'tasks/updateTaskStatus',
-  async ( updatedTask: Task ) => {
+  async ( updatedTask: TaskUpdate ) => {
+    // @TODO sending Partial<T> instead of T 
+    // fix on backend controller
     const response = await axios.put(`/api/task/${updatedTask.id}`, updatedTask);
     return updatedTask;
   }

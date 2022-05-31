@@ -9,6 +9,7 @@ import '../css/breathe.css'
 import { HiTerminal,  HiCode } from 'react-icons/hi'
 import { IoColorPaletteSharp } from 'react-icons/io5'
 import { createLog, selectLogs, logsSelectors } from '../services/logs'
+
 import { createTask, fetchTasks, tasksSelectors, selectActiveTasks, selectActiveTaskTitles } from '../services/tasks'
 
 interface CLIProps {
@@ -302,10 +303,14 @@ const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
       taskNamesArray.push(task)
     }
   })
+  
+  let timestamp = Date.now()
+  let timeLastWorked = Date.now()
 
   const [ inputValue, setInputValue ] = useState('')
   const [ description, setDesc ] = useState('')
-
+  const [ inputValue, setInputValue ] = useState('')
+  
   const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     setInputValue( e.target.value )
   }
@@ -318,8 +323,9 @@ const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
     console.log('phooey')    
   }
 
-
-  const timeLastWorked = Date.now()
+  const handleFill = ( ) => {
+    console.log('bepp')
+  }
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
@@ -334,7 +340,6 @@ const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
     dispatch( createTask( task ) )      
   }
 
-
   return (
     <form onSubmit={ onSubmit }>
       <Hint options={taskNamesArray} allowTabFill onFill={handleFill} >
@@ -345,6 +350,13 @@ const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
   )
 
 }
+
+  /*
+interface TimespanInputProps {
+  formState: string
+  updateTimespan: React.ChangeEventHandler<HTMLInputElement>
+}
+   */
 
 
 interface SectorProps {

@@ -5,7 +5,6 @@ import "reflect-metadata";
 
 import React, { useState, Component } from 'react';
 import { Provider } from 'react-redux';
-import { EntityState } from '@reduxjs/toolkit';
 
 import './css/style.css';
 import './css/breathe.css';
