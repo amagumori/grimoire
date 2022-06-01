@@ -2,6 +2,7 @@ import React, { forwardRef, ForwardRefExoticComponent, FunctionComponent, useEff
 import { useSelector } from 'react-redux'
 import { useAppDispatch } from '../services/store'
 import { Hint } from './Hint'
+import { HintListInput } from './MyHintList'
 import { Log, Task, Sector } from '../Types'
 import { EntityState } from '@reduxjs/toolkit'
 import store from '../services/store'
@@ -204,6 +205,15 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
   const [sector, setSector] = useState<Sector>(Sector.none)
   const [description, setDesc] = useState('')
 
+  var taskNamesArray: Array<string> = []
+  const taskNames = useSelector( selectActiveTaskTitles )
+
+  taskNames.map( ( task ) => {
+    if ( task !== undefined ) {
+      taskNamesArray.push(task)
+    }
+  })
+
   const onSubmit = ( e: React.SyntheticEvent ) => {
     let log: Log = {
       description: description,
@@ -240,6 +250,10 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     setTextAreaActive(true)
   }
 
+  const textAreaChange = ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
+    setDesc( e.target.value )
+  }
+
   const timeSpentKeyUp = ( e: React.KeyboardEvent<HTMLInputElement> ) => {
     if ( e.key === 'Enter' ) {
       // good lord.
@@ -254,6 +268,10 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     }
   }
 
+  const handleFill = ( word: String | Object | undefined ) => {
+    console.log('phooey')    
+  }
+
 
   // now need to make it update timespan so we can create log
 
@@ -265,7 +283,8 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
         <div className="time-spent-wrapper">
           <input className="time-spent" onKeyUp={timeSpentKeyUp} onChange={setTimespan} onFocus={toggleOn} onBlur={toggleOff}></input>
         </div>
-        { textAreaActive === true ? <textarea onKeyUp={textAreaKeyup} className="log-description" /> : null }
+        { textAreaActive === true ? <textarea onKeyUp={textAreaKeyup} onChange={textAreaChange} className="log-description" /> : null }
+        <HintListInput names={taskNamesArray} />
       </form>
     )
 
