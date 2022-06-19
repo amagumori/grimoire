@@ -29,7 +29,7 @@ const App: React.FC = () => {
 
   const tenDaysAgo = 86400 * 1000 * 10
   const oneDay = 86400 * 1000 
-  const defaultTimebarEnd = new Date( Date.now() + 6 * 60 * 60000 )
+  const defaultTimebarEnd = new Date( Date.now() )
   const defaultTimebarStart = new Date( defaultTimebarEnd.getTime() - oneDay )
 
   //console.table( store.getState().logs ) 

@@ -13,44 +13,111 @@ import { BiBody, BiCctv, BiShapePolygon, BiCycling, BiDna, BiEqualizer } from 'r
 // we'll wrap our picker around the timebar for now.
 export const TimeBarContainer: FunctionComponent = () => {
 
-  const now = Date.now()
-  const day = new Date( now - 86400000 )
+  const wrapperRef: React.RefObject<HTMLDivElement> = useRef(null)
 
-  const [ start, setStart ] = useState(new Date(now))
-  const [ end, setEnd ] = useState( new Date(day) )
+  const [playheadPos, setPlayheadPos ] = useState(0)
+  const [clientWidth, setClientWidth] = useState(0)
+  const [ clientOffset, setClientOffset ] = useState(0)
+
+  const [ctrlPressed, setShiftPressed ] = useState(false)
+
+  const now = Date.now()
+  const day = new Date( now - 86400000 ).getTime()
+
+  const [ start, setStart ] = useState( day ) 
+  const [ end, setEnd ] = useState( now )
+
+  const wheelZoomFactor = 1000000
+
+  const handleShift = ( e: KeyboardEvent ) => {
+    e.preventDefault()
+    if ( e.key == 'Shift') {
+      setShiftPressed(true)
+    }
+  }
+
+  const handleShiftUp = ( e: KeyboardEvent ) => {
+    e.preventDefault()
+    if ( e.key == 'Shift') {
+      setShiftPressed(false)
+    }
+  }
+
+  const handleWheel = ( e: WheelEvent ) => {
+    //setPlayheadPos( playheadPos + 20 )
+    //    let offsetFromCenter = (clientWidth / 2 ) - (playheadPos - clientOffset)
+    let pos = playheadPos - clientOffset
+    let center = clientWidth * 0.5
+    let offsetFromCenter = pos - center
+    let offsetFactor = offsetFromCenter / center
+
+    console.info( e )
+
+    if ( shiftPressed ) {
+      // zoom
+      setStart( ( prev ) => prev - ( e.deltaY * wheelZoomFactor ) )
+      setEnd ( (prev) => prev + ( e.deltaY * wheelZoomFactor ) )
+    } else {
+      // scroll side to side
+      setStart( (prev) => prev + (e.deltaY * wheelZoomFactor ) )
+      setEnd( (prev) => prev - (e.deltaY * wheelZoomFactor ) )
+    }
+      /*
+    setStart( ( prev ) => prev - ( e.deltaY * wheelZoomFactor ) )
+    setEnd ( (prev) => prev + ( e.deltaY * wheelZoomFactor ) )
+       */
+  }    
 
   const setDay = (e : React.MouseEvent<HTMLButtonElement> ) => { 
     setStart( day ) 
   }
   const setWeek = (e : React.MouseEvent<HTMLButtonElement> ) => {
-    setStart( new Date( now - 604800000 ) )
+    setStart( now - 604800000 )
   }
   const setMonth = (e : React.MouseEvent<HTMLButtonElement> ) => {
-    setStart( new Date( now - 2629800000 ) )
+    setStart( now - 2629800000 )
   }
 
+  useEffect( () => {
+    if ( wrapperRef.current != null ) {
+      setClientWidth( wrapperRef.current.offsetWidth )
+      setClientOffset( wrapperRef.current.offsetLeft )
+    }
+    document.addEventListener( 'wheel', handleWheel, true )
+    document.addEventListener( 'keydown', handleShift, true)
+    document.addEventListener( 'keyup',  handleShiftUp, true)
+    return () => {
+      document.removeEventListener('wheel', handleWheel)
+      document.removeEventListener('keydown', handleShift)
+      document.removeEventListener('keyup', handleShiftUp)
+    }
+  }, [] )
+
   return ( 
-  <div className='timebar-wrapper'>
-    <div className='timebar-buttons'>
-      <button onClick={ setDay }>DAY</button>
-      <button onClick={ setWeek }>WEEK</button>
-      <button onClick={ setMonth }>MONTH</button>
-    </div>
-      <TimeBar startTime={start} endTime={end} /> 
+    <div className='timebar-wrapper' ref={wrapperRef} >
+      <div className='timebar-buttons'>
+        <button onClick={ setDay }>DAY</button>
+        <button onClick={ setWeek }>WEEK</button>
+        <button onClick={ setMonth }>MONTH</button>
+      </div>
+      <TimeBar startTime={ start } endTime={ end } playheadPos={playheadPos} setPlayheadPos={setPlayheadPos} /> 
     </div>
   )
+  // start wrapping passed state mutators within useCallback to memoize
 }
 
 interface TimeBarProps {
-  startTime: Date
-  endTime: Date
+  startTime: number, 
+    endTime: number,
+    playheadPos: number,
+    setPlayheadPos: Function
 }
 
-export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
+export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, playheadPos, setPlayheadPos } ) => {
   const dispatch = useAppDispatch()
   const timebarRef: React.RefObject<HTMLDivElement> = useRef(null)
 
-  const selectRange = makeSelectRange( props.startTime.getTime(), props.endTime.getTime() )
+  const selectRange = makeSelectRange( startTime, endTime )
 
   const theLogs = useSelector( selectRange );
 
@@ -61,20 +128,31 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   const [ clientOffset, setClientOffset ] = useState(0)
   const [ endMarkerPos, setEndMarker ] = useState(0)
   const [ spanMarkerHidden, toggleSpanMarker] = useState(true)
-  const [ playheadPos, setPlayheadPos ] = useState(0)
+  //const [ playheadPos, setPlayheadPos ] = useState(0)
 
   const [ logFormActive, setLogFormActive ] = useState(false)
 
   const now = new Date( Date.now() )
-  const timespan = props.endTime.getTime() - props.startTime.getTime()
+
+
+  var startBound = startTime
+  var endBound = endTime
+
+
+  const timespan = endTime - startTime
+  var loadSpan = endBound - startBound
+
+  const tickTimespan = timespan / 6;
+  var tickTime = new Date(startTime);
+
   const msToPixRatio = clientWidth / timespan
   const pixToMsRatio = timespan / clientWidth
 
   // worst one-liner in history?
-  const playheadTimestamp = Math.trunc( props.startTime.getTime() + ( pixToMsRatio * ( playheadPos - clientOffset ) ) )
+  const playheadTimestamp = Math.trunc( startTime + ( pixToMsRatio * ( playheadPos - clientOffset ) ) )
   const selectByTimestamp = makeSelectByTimestamp( playheadTimestamp )
 
-  const nowOffset = ( now.getTime() - props.startTime.getTime() ) * msToPixRatio
+  const nowOffset = ( now.getTime() - startTime ) * msToPixRatio
 
   const updateTimeSpent = ( e: React.ChangeEvent<HTMLInputElement> ) => {
     let val
@@ -98,12 +176,24 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
   let offset = 0
   const timeRatio = (time: number) => { return ( time / timespan ) }
 
+  const newTimeRatio = ( time: number ) => { return ( time / loadSpan ) } 
+
+  // we'd have "pushweight" of how much to push the start and end based on the playhead offset
+  // so then timespan += 10%
+  // then start reduces by 4% and end increases by 6%..?
+
+    /*
+  const filteredEntries = theLogs.filter( (log) => {
+    return log.timestamp > startBound && log.timestamp < endBound
+  })
+     */
+
   const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
 
-    let offset = timeRatio( log.timestamp - props.startTime.getTime() )
+    let offset = timeRatio( log.timestamp - startBound )
     offset *= clientWidth
     let perc = `${timeRatio(log.timeSpent) * 100 }%`
-    
+
     let rand0 = Math.random()
     let rand1 = Math.random()
     let css = {
@@ -113,6 +203,14 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
     }
     return ( <TimeBarEntry id={log.id ? log.id : -1 } selectLogHook={setCurrentLogId} css={css} /> )
   })
+
+  let ticks = []
+
+  for ( let i=0; i < 6; i++ ) {
+    let offset = tickTimespan * i;
+    tickTime.setTime( tickTime.getTime() + offset );
+    ticks.push( (<div className="tick-mark">{ tickTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }</div> ) );
+  }
 
   return (
     <div className="timebar-wrapper">
@@ -125,8 +223,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( props ) => {
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ nowOffset } />
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
       <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
-    </div>
-      <div className="clock">{pixToMsRatio} : {msToPixRatio} </div>
+      </div>
+      <div className="tick-line">
+        {ticks}
+      </div>
       <EntryView id={currentLogId} hidden={false} />
     </div>
   )
@@ -237,7 +337,6 @@ const EntryView: FunctionComponent<EntryViewProps> = ( { id, hidden } ) => {
   //<span className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes() }</span>
   return (
     <div key={ log.id } className="entry-view">
-      <div> { JSON.stringify(log) } </div>
       <div className="sector">{ logIcon }</div>
       <div className="entry-time">{ new Date(+log.timestamp).toLocaleString('en-US') }</div>
       <div className="entry-time">{ log.timeSpent }</div>

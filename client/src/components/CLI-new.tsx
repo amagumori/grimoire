@@ -205,14 +205,7 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
   const [sector, setSector] = useState<Sector>(Sector.none)
   const [description, setDesc] = useState('')
 
-  var taskNamesArray: Array<string> = []
-  const taskNames = useSelector( selectActiveTaskTitles )
-
-  taskNames.map( ( task ) => {
-    if ( task !== undefined ) {
-      taskNamesArray.push(task)
-    }
-  })
+  const tasks = useSelector( selectActiveTaskTitles )
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
     let log: Log = {
@@ -284,7 +277,7 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
           <input className="time-spent" onKeyUp={timeSpentKeyUp} onChange={setTimespan} onFocus={toggleOn} onBlur={toggleOff}></input>
         </div>
         { textAreaActive === true ? <textarea onKeyUp={textAreaKeyup} onChange={textAreaChange} className="log-description" /> : null }
-        <HintListInput names={taskNamesArray} />
+        <HintListInput />
       </form>
     )
 
@@ -331,73 +324,6 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
 interface SubTaskFormProps {
   timestamp: number
 }
-
-
-const SubTaskForm: FunctionComponent<SubTaskFormProps> = ( { timestamp } ) => {
-
-  const dispatch = useAppDispatch()
-
-  useEffect( () => {
-    dispatch( fetchTasks() )
-  }, [dispatch] )
-
-  var taskNamesArray: Array<string> = []
-  const taskNames = useSelector( selectActiveTaskTitles )
-
-  taskNames.map( ( task ) => {
-    if ( task !== undefined ) {
-      taskNamesArray.push(task)
-    }
-  })
-  
-  let timeLastWorked = Date.now()
-
-  const [ inputValue, setInputValue ] = useState('')
-  const [ description, setDesc ] = useState('')
-  
-  const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
-    setInputValue( e.target.value )
-  }
-
-  const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
-    setDesc( e.target.value )
-  }
-
-  const handleFill = ( word: String | Object | undefined ) => {
-    console.log('phooey')    
-  }
-
-  const onSubmit = ( e: React.SyntheticEvent ) => {
-    e.preventDefault();
-    let task: Task = {
-      active: true,
-      timestamp: timestamp,
-      timeLastWorked: timeLastWorked,
-      percentageFinished: 0,
-      elapsedWorkTime: 50,
-      description: description
-    }
-    dispatch( createTask( task ) )      
-  }
-
-  return (
-    <form onSubmit={ onSubmit }>
-      <Hint options={taskNamesArray} allowTabFill onFill={handleFill} >
-        <input autoFocus className="cli-input" value={inputValue} onChange={onChange}></input>
-      </Hint>
-      <input autoFocus className="task-description" onChange={descChange} value={description}></input>
-    </form>
-  )
-
-}
-
-  /*
-interface TimespanInputProps {
-  formState: string
-  updateTimespan: React.ChangeEventHandler<HTMLInputElement>
-}
-   */
-
 
 interface SectorProps {
   active: boolean

@@ -2,6 +2,8 @@
 @import url("https://css.gg/css");
 @import url('https://fonts.googleapis.com/css2?family=Viga&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600&display=swap');
+
 .rah-input-wrapper {
   color: #eee;
   width: 50%;
@@ -146,12 +148,15 @@
 body {
   background-color: #2a363b;
   color: #bbb;
-  font: 0.75em "Didact Gothic", sans-serif;
+  /* font: 0.75em "Didact Gothic", sans-serif; */
+  font: 12px 'Work Sans', sans-serif;
   animation: movebg 8s;
   background-image: url("bg.svg"), url("bg.svg"); 
   background-repeat: repeat, repeat;
   background-position: 0px 1px 0px 1px;
   background-blend-mode: difference;
+
+  overflow: hidden;
 }
 
 h3 {
@@ -201,10 +206,7 @@ li {
 }
 
 .test-timebar-container {
-  margin-left: 25%;
-  margin-right: 25%;
-  margin-top: 25%;
-  margin-bottom: 25%;
+  margin: 10%;
   display: grid;
  
   height: 100vh;
@@ -438,33 +440,31 @@ h1 {
 }
 
 .hint-list {
-  position: relative;
-  bottom: 24px;
   transform: translatey(0px);
   animation: float 5s ease-in-out infinite;
   mix-blend-mode: multiply;
-  text-align: center;
-  text-transform: uppercase;
-  font-weight: bold;
-  letter-spacing: 3px;
-  font-size: 15px;
-  color: $color-brown;
-  background-color: $color-beige;
-  padding: 50px;
-  border-radius: 11px;
+  letter-spacing: 1px;
+  font-size: 11px;
+  color: #fff;
+  background-color: #757c56;
+  padding: 10px;
+  border-radius: 6px;
   position: relative;
-  box-shadow: 20px 20px $color-blue;
-  font-family: 'Rajdhani', sans-serif;
+  margin-top: -50%;
+  box-shadow: 2px 2px #869d6d;
+  font-weight: 300;
   /* border: 1px solid $color-green; */
 }
+
+/*
 .hint-list:after {
   transform: translatey(0px);
   animation: float2 5s ease-in-out infinite;
   content: ".";
   font-weight: bold;
-  /* -webkit-text-stroke: 0.5px $color-green; */
+  -webkit-text-stroke: 0.5px $color-green; 
   -webkit-text-fill-color: $color-beige;
-  /* border: 1px solid $color-green; */
+  border: 1px solid $color-green; 
   text-shadow: 22px 22px $color-blue;
   text-align: left;
   font-size: 55px;
@@ -479,6 +479,19 @@ h1 {
   left: 0;
   box-shadow: 22px 22px $color-blue;
   z-index: -2;
+}
+*/
+
+.hint-input-wrapper {
+  height: 16px;
+}
+
+.hint-list-item {
+  
+}
+
+.hint-list-item-selected {
+  background-color: #869d6d;
 }
 
 @keyframes float {
@@ -575,194 +588,43 @@ h1 {
   width: 100%;
 }
 
-
-
-.cli-instructions {
+.tick-line {
   width: 100%;
-  padding: 0.5em;
+  position: relative;
 }
 
-#new-entry-form {
-  display: contents;
+.tick-mark {
+  border-left: 1px solid #ccc;
+  height: 8px;
+  position: absolute;
 }
 
-.logo {
-  width: 20px;
-  height: 20px;
-  justify-self: center;
+tick-mark:nth-child(1) {
+  left: 0%;
 }
-
-.title {
-  font-size: 16px;
-  grid-column: 2;
-  padding: 2px 0 0 -2px;
-  font-family: 'Rajdhani', sans-serif;
-  justify-self: left;
+.tick-mark:nth-child(2) {
+  left: 16.666%;
 }
-
-#footer {
-  grid-area: footer;
+.tick-mark:nth-child(3) {
+  left: 33.333%;
 }
-
-.shade {
- /* background: #2a363b; */
-  min-width: 100%;
+.tick-mark:nth-child(4) {
+  left: 50%;
 }
-
-.shade:hover {
-  background: rgba(40, 40, 68, 0.5);
+.tick-mark:nth-child(5) {
+  left: 66.666%;  
 }
-
-.icn {
-  color: #333;
-  background: #22c1d2;
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 0.4em;
-  box-shadow: inset 0 0 10px #11b0c0;
-  text-align: center;
+.tick-mark:nth-child(6) {
+  left: 83.333%;
 }
-
-i {
-  font-smooth: never;
-  -webkit-font-smoothing: none;
-}
-
-i:hover {
-  color: rgba(197, 97, 95, 1);
-}
-
-.icon-bar {
-  font-size: 14px;
-  grid-column: span 12;
-  margin-top: 0;
-  color: #99b898;
-}
-
-.pad-icn {
-  padding-left: 4px;
-  padding-right: 0.5em;
-}
-
-.stopwatch {
-}
-
-#input-container {
-  grid-template-columns: repeat(16, 1fr);
+.tick-mark:nth-child(7) {
+  left: 100%;
 }
 
 input {
-  color: #a3a3a3;
-  font-feature-settings: case;
-  background-color: transparent;
-  border: none;
-}
-
-.input-small {
-  grid-column: span 1;
-}
-
-.input-med {
-  grid-column: span 8;
-}
-
-.input-long {
-  grid-column: span 8;
-}
-
-.c1 {
-  grid-column-start: 1;
-}
-
-.c2 {
-  grid-column-start: 2;
-}
-
-.c3 {
-  grid-column-start: 3;
-}
-
-.c4 {
-  grid-column-start: 4;
-}
-
-.c5 {
-  grid-column-start: 5;
-}
-
-.c10 {
-}
-
-.e8 {
-  grid-column-end: 8;
-}
-
-.r10 {
-  grid-row-start: 10;
-}
-
-.wrapper {
-  display: contents;
-}
-
-.project {
-}
-
-.desc {
-  grid-column: span 8;
-  grid-row: span 1;
-  overflow: hidden;
-  margin-left: 1em;
-}
-
-.date {
-  height: 12px;
-  font-size: 10px;
-  border: 1px solid #ccc;
+  outline: none;
   border-radius: 2px;
-  /* padding: 0 2px 0 2px; */
-  justify-self: center;
-  padding: 1px 4px 1px 4px;
-}
-
-.area {
-  justify-self: center;
-  font-size: 14px;
-}
-
-.time {
-/*
-  justify-self: center; */
-}
-
-.insp {
-  /* justify-self: center; */
-
-}
-
-.pad {
-  padding: 0 4px 0 4px;
-}
-
-.test-item {
-  background-color: #ff0000;
-  display: contents;
-}
-
-.test-item > * {
-  padding: 2px;
-}
-
-.input-desc {
-  color: white;
-  grid-row-start: 7;
-  font-size: 6;
-}
-
-.input-desc2 {
-  color: white;
-  grid-row-start: 9;
-  font-size: 6;
+  background-color: #455961;
 }
 
 input:focus {

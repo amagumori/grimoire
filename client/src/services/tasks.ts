@@ -121,22 +121,29 @@ export const tasksSlice = createSlice({
 
 type RootState = ReturnType<typeof store.getState>
 
-type Return = (state: RootState) => Task[] | undefined
+type Return = (state: RootState) => Array<Task> | undefined
 
 export const tasksSelectors = tasksAdapter.getSelectors<RootState>(
   (state) => state.tasks
 )
 
-export const selectActiveTasks = (): Return => createSelector(
+export const selectActiveTasks = () => createSelector(
   tasksSelectors.selectAll,
   (tasks) => tasks.filter( (task) => task.active)
 )
 
 type ReturnTitles = ( state: RootState ) => String[] | undefined
 
+export interface TaskNameIdPair {
+  id: number,
+  description: string
+};
+
+type TaskNames = ( state: RootState ) => TaskNameIdPair[] | undefined 
+
 export const selectActiveTaskTitles = createSelector(
   tasksSelectors.selectAll,
-  (tasks) => tasks.map( (task) => { if (task.active && task.description ) return task.description } )
+  (tasks) => tasks.map( (task) => { if (task.active && task.description ) return { id: task.id, description: task.description } } )
 )
 
 //export const selectTasks = (state: RootState) => state.tasks
