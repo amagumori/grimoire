@@ -19,7 +19,7 @@ export const TimeBarContainer: FunctionComponent = () => {
   const [clientWidth, setClientWidth] = useState(0)
   const [ clientOffset, setClientOffset ] = useState(0)
 
-  const [ctrlPressed, setShiftPressed ] = useState(false)
+  const [ shiftPressed, setShiftPressed ] = useState(false)
 
   const now = Date.now()
   const day = new Date( now - 86400000 ).getTime()
@@ -117,9 +117,13 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
   const dispatch = useAppDispatch()
   const timebarRef: React.RefObject<HTMLDivElement> = useRef(null)
 
+    /*
   const selectRange = makeSelectRange( startTime, endTime )
 
   const theLogs = useSelector( selectRange );
+     */
+
+  const theLogs = useSelector( logsSelectors.selectAll )
 
   const [ loaded, setLoaded ] = useState(false)
   const [ currentLogId, setCurrentLogId ] = useState(0)
@@ -188,8 +192,13 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
   })
      */
 
-  const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
+  const activeLogs = theLogs.filter( (log) => {
+    return log.timestamp > startBound && log.timestamp < endBound 
+  })
 
+  const entries = activeLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
+
+    /*
     let offset = timeRatio( log.timestamp - startBound )
     offset *= clientWidth
     let perc = `${timeRatio(log.timeSpent) * 100 }%`
@@ -201,7 +210,10 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
       left: offset,
       backgroundColor: `rgba(${rand1 * 255}, ${rand0 * 255}, ${rand1 * 255}, ${rand0 * 255} )`
     }
-    return ( <TimeBarEntry id={log.id ? log.id : -1 } selectLogHook={setCurrentLogId} css={css} /> )
+     */
+    let offset = timeRatio( log.timestamp - startBound) * clientWidth
+    let perc = `${timeRatio(log.timeSpent) * 100 }%`
+    return ( <TimeBarEntry id={log.id ? log.id : -1 } offset={offset} width={perc} clientWidth={clientWidth} /> )
   })
 
   let ticks = []
@@ -255,19 +267,15 @@ const TimeSpan: FunctionComponent<TimeSpanProps> = ( { hidden, offset, width } )
 
 interface EntryProps {
   id:  number
-  selectLogHook: Function
-  css: React.CSSProperties
+  offset: number,
+  width: string,
+  clientWidth: number,
+    //css: React.CSSProperties
 }
 
-const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, selectLogHook, css } ) => {
+const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, offset, width, clientWidth} ) => {
 
-  //const baseCSS = props.css
-
-  //let baseColor = props.css.backgroundColor
-
-  //const [css, setCSS] = useState<React.CSSProperties>()
-
-    /*
+  /*
   const onMouseEnter = ( e: React.MouseEvent<HTMLDivElement> ) => {
     let color = { background: 'red' } 
     let newCSS = { ...baseCSS, ...color }
@@ -281,13 +289,19 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, selectLogHook, css }
   }
      */
 
-  const onClick = ( e: React.MouseEvent<HTMLDivElement> ) => {
-    selectLogHook( id )
-  }
+  const log = logsSelectors.selectById( store.getState(), id );
+  if ( log == undefined || log.id == undefined ) return null
 
+
+    /*
+  const onClick = ( e: React.MouseEvent<HTMLDivElement> ) => {
+  }
+     */
+
+  let bgString = `rgb(0, ${log.timeSpent / 10000}, 180)`
   // style
   return (
-    <div key={ id } className="timebar-entry" style={css} onClick={ onClick }>
+    <div key={ log.id ? log.id : -1 } className="timebar-entry" style={ { width: width, left: offset, backgroundColor: bgString }} >
     </div>
   )
 }

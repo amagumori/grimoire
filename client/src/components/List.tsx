@@ -49,9 +49,9 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
     //let currentTimestamp = new Date( "2021-11-20T00:00:00+0000" )
     // do a whole month
-    let currentTimestamp = Date.now() - ( dayInMs * 5 )
+    let currentTimestamp = Date.now() - ( dayInMs * 50 )
 
-    for ( var i=0; i < 38; i++ ) {
+    for ( var i=0; i < 380; i++ ) {
       //if ( currentTimestamp >= Date.now() ) break;
       let desc = faker.lorem.sentence()
       let timestamp = currentTimestamp
@@ -76,7 +76,6 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
       console.log('increment in ms: ' + incrementMs )
       //console.log("dummy log: " + JSON.stringify(dummyLog))
       dispatch(createLog(dummyLog))
-
     }
   }
 
