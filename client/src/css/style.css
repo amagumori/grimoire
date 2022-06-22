@@ -115,6 +115,9 @@
 }
 
 .timebar-entry {
+
+  will-change: left, width;
+
   position: relative;
   margin-bottom: 2px;
   border-radius: 2px;

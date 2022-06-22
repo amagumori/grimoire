@@ -116,14 +116,11 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
   const dispatch = useAppDispatch()
   const timebarRef: React.RefObject<HTMLDivElement> = useRef(null)
 
-  //const selectRange = makeSelectRange( startTime, endTime )
-
-  //const theLogs = useSelector( selectRange );
-
-  //const theLogs = useSelector( logsSelectors.selectAll )
   //const ids = useSelector( logsSelectors.selectIds)
 
   const logsInRange = selectRange(store.getState())(startTime, endTime)
+
+  const theLogs = useSelector( selectRange );
 
   const [ loaded, setLoaded ] = useState(false)
   const [ currentLogId, setCurrentLogId ] = useState(0)
@@ -191,31 +188,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
   const entries = logsInRange.map( (log) => {
     return ( <TimeBarEntry id={log.id ? log.id : -1} start={startBound} end={endBound} clientWidth={clientWidth} /> )
   })
-
-    /*
-  const entries = theLogs.map( (log: Log) => {
-    let offset = newTimeRatio(log.timestamp - startBound) * clientWidth
-    let perc = `${newTimeRatio(log.timeSpent) * 100}%`
-    return ( <TimeBarEntry id={log.id ? log.id : -1 } selectLogHook={setCurrentLogId} offset={offset} width={perc} clientWidth={clientWidth} /> )
-  })
- 
-  const entries = theLogs.map( (log: Log, index: number, logs: Array<Log> ) => {
-
-    let offset = timeRatio( log.timestamp - startBound )
-    offset *= clientWidth
-    let perc = `${timeRatio(log.timeSpent) * 100 }%`
-
-    let rand0 = Math.random()
-    let rand1 = Math.random()
-    let css = {
-      width: perc,
-      left: offset,
-      backgroundColor: `rgba(${rand1 * 255}, ${rand0 * 255}, ${rand1 * 255}, ${rand0 * 255} )`
-    }
-    return ( <TimeBarEntry id={log.id ? log.id : -1 } selectLogHook={setCurrentLogId} css={css} /> )
-  })
-     */
-
+    
   let ticks = []
 
   for ( let i=0; i < 6; i++ ) {
@@ -268,18 +241,10 @@ const TimeSpan: FunctionComponent<TimeSpanProps> = ( { hidden, offset, width } )
 interface EntryProps {
   id: EntityId,
   start: number,
-    end: number,
+  end: number,
   clientWidth: number
-
-    /*selectLogHook: Function
-  offset: number,
-  width: string,
-  clientWidth: number
-  //css: React.CSSProperties
-     */
 }
 
-  /*
 const useAnimationFrame = ( callback: Function ) => {
   const reqRef = useRef()
   const prevTs = useRef()
@@ -298,7 +263,6 @@ const useAnimationFrame = ( callback: Function ) => {
     return () => cancelAnimationFrame(reqRef.current)
   }, [])
 }
-   */
 
 // use zoomLevel ( timespan ) and offset / playheadPos / timestamp 
 // could do optional prop of scrollDelta, attach event handler in parent, pass as prop, only update translate IF scrollDelta != 0
@@ -324,16 +288,19 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, start, end, clientWi
 
   if ( log!.timestamp! > end || log!.timestamp! < start ) return null
 
+  const log = logsSelectors.selectById( store.getState(), id );
+  if ( log == undefined || log.id == undefined ) return null
+
   const onClick = ( e: React.MouseEvent<HTMLDivElement> ) => {
     //selectLogHook( id )
   }
 
-  // style
   return (
-    <div key={ id } className="timebar-entry" style={css} onClick={ onClick }>
+    <div key={ log.id ? log.id : -1 } className="timebar-entry" style={css} />
     </div>
   )
 }
+
 interface EntryViewProps {
   id: number
   hidden: boolean
