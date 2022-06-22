@@ -195,6 +195,12 @@ export const makeSelectRange = (start: number, end: number) => {
   return selector;
 }
 
+export const selectRange = createSelector(
+  logsSelectors.selectAll,
+  (logs) => (start: number, end: number) => logs.filter( (log) => log.timestamp > start && log.timestamp < end )
+)
+
+
 export const selectLogs = (state: RootState) => state.logs
 
 export default logsSlice.reducer

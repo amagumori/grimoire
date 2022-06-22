@@ -43,7 +43,6 @@ const App: React.FC = () => {
         <List listType="tasks" />
         <TileView />
         <div className="test-timebar-container">
-          <CreateDummyTaskButton />
           <TimeBarContainer />
         </div>
       </div>

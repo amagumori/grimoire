@@ -36,7 +36,7 @@ export class Draggable extends React.Component<DummyProps, DraggableState> {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.setState( { x: this.props.parentX })
+    this.setState( { x: this.props.parentX + this.props.nowOffset })
     //this.setState( { x: this.props.parentX, timestamp: new Date(Date.now() - this.props.timespan ) })
 
     //console.log('effective time: ' + new Date( Date.now() - this.props.timespan ) )
@@ -54,10 +54,19 @@ export class Draggable extends React.Component<DummyProps, DraggableState> {
   }
 
   componentDidUpdate( prevProps: DummyProps ) {
-    if ( prevProps.parentX !== this.props.parentX ) {
-      this.setState({
-        x: this.props.parentX 
-      })
+    if ( prevProps.parentX !== this.props.parentX || prevProps.nowOffset !== this.props.nowOffset ) {
+      if ( this.props.nowOffset < 0 ) {
+        // @FIXME THIS SHOULD NOT HAPPEN HERE
+        // THESE CHECKS SHOULD HAPPEN BEFORE WE EVEN PROPAGATE DOWN TO THIS COMPONENT
+        this.props.setPlayheadPos(0)
+        this.setState({
+          x: this.props.parentX
+        })
+      } else {
+        this.setState({
+          x: this.props.parentX + this.props.nowOffset
+        })
+      }
     }
   }
 

@@ -49,9 +49,9 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
 
     //let currentTimestamp = new Date( "2021-11-20T00:00:00+0000" )
     // do a whole month
-    let currentTimestamp = Date.now() - ( dayInMs * 5 )
+    let currentTimestamp = Date.now() - ( dayInMs * 500 )
 
-    for ( var i=0; i < 38; i++ ) {
+    for ( var i=0; i < 3800; i++ ) {
       //if ( currentTimestamp >= Date.now() ) break;
       let desc = faker.lorem.sentence()
       let timestamp = currentTimestamp
@@ -140,9 +140,9 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
     const logs = allLogs.map( (log) => {
       <LogItem key={log.id} {...log} />
     })
+    //<CreateDummyTaskButton />
     return (
       <div className="new-list-container">
-        <CreateDummyTaskButton />
         <div className="cli-wrapper" />
         { logs } 
       </div>
