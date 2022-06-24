@@ -29,6 +29,7 @@ export const TimeBarContainer: FunctionComponent = () => {
 
   const wheelZoomFactor = 10000
 
+    /*
   const handleZ = ( e: KeyboardEvent ) => {
     e.preventDefault()
     if ( e.key == 'Z') {
@@ -42,8 +43,11 @@ export const TimeBarContainer: FunctionComponent = () => {
       setZPressed(false)
     }
   }
+     */
 
+    /*
   const handleWheel = ( e: WheelEvent ) => {
+    e.preventDefault()
     setPlayheadPos( (pos) => pos + (e.deltaY * 0.1) )
     //    let offsetFromCenter = (clientWidth / 2 ) - (playheadPos - clientOffset)
     let pos = playheadPos - clientOffset
@@ -63,9 +67,10 @@ export const TimeBarContainer: FunctionComponent = () => {
       /*
     setStart( ( prev ) => prev - ( e.deltaY * wheelZoomFactor ) )
     setEnd ( (prev) => prev + ( e.deltaY * wheelZoomFactor ) )
-       */
+       
   }    
 
+  */
   const setDay = (e : React.MouseEvent<HTMLButtonElement> ) => { 
     setStart( day ) 
   }
@@ -76,21 +81,22 @@ export const TimeBarContainer: FunctionComponent = () => {
     setStart( now - 2629800000 )
   }
 
-  // put the event listeners in useLayoutEffect
-  useEffect( () => {
+    /*
+    useEffect( () => {
     if ( wrapperRef.current != null ) {
       setClientWidth( wrapperRef.current.offsetWidth )
       setClientOffset( wrapperRef.current.offsetLeft )
     }
     document.addEventListener( 'wheel', handleWheel, true )
-    document.addEventListener( 'keydown', handleZ, true)
-    document.addEventListener( 'keyup',  handleZUp, true)
+    //document.addEventListener( 'keydown', handleZ, true)
+    //document.addEventListener( 'keyup',  handleZUp, true)
     return () => {
       document.removeEventListener('wheel', handleWheel)
-      document.removeEventListener('keydown', handleZ)
-      document.removeEventListener('keyup', handleZUp)
+      //document.removeEventListener('keydown', handleZ)
+      //document.removeEventListener('keyup', handleZUp)
     }
   }, [] )
+     */
 
   return ( 
     <div className='timebar-wrapper' ref={wrapperRef} >
@@ -130,6 +136,9 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
   const [ endMarkerPos, setEndMarker ] = useState(0)
   const [ spanMarkerHidden, toggleSpanMarker] = useState(true)
   //const [ playheadPos, setPlayheadPos ] = useState(0)
+
+  const [ zoomFactor, setZoomFactor ] = useState(0)
+  const [ timelineOffset, setTimelineOffset ] = useState(0)
 
   const [ logFormActive, setLogFormActive ] = useState(false)
 
@@ -183,11 +192,13 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
   // so then timespan += 10%
   // then start reduces by 4% and end increases by 6%..?
 
-  console.info( logsInRange )
+  console.log( logsInRange.length )
 
+    /*
   const entries = logsInRange.map( (log) => {
-    return ( <TimeBarEntry id={log.id ? log.id : -1} start={startBound} end={endBound} clientWidth={clientWidth} /> )
+    return ( <TimeBarEntry id={log.id ? log.id : -1} selectLogHook={setCurrentLogId} start={startBound} end={endBound} clientWidth={clientWidth} /> )
   })
+     */
     
   let ticks = []
 
@@ -202,9 +213,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { startTime, endTime, 
       <div>CURRENT timestamp: {playheadTimestamp}</div>
       <CLI updateTimespan={ updateTimeSpent } toggleSpanMarker={ toggleSpanMarker } timestamp={ playheadTimestamp}></CLI>
       <div className="timebar" ref={timebarRef} >
-
-        {entries}
-
+        <TimebarWrapper startTime={startTime} endTime={endTime} clientWidth={clientWidth} clientOffset={clientOffset} />
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ playheadPos } />
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
       <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
@@ -238,13 +247,72 @@ const TimeSpan: FunctionComponent<TimeSpanProps> = ( { hidden, offset, width } )
 }
 
 
-interface EntryProps {
-  id: EntityId,
-  start: number,
-  end: number,
-  clientWidth: number
+interface WrapperProps {
+  startTime: number,
+  endTime: number,
+  clientWidth: number,
+  clientOffset: number
 }
 
+const TimebarWrapper: FunctionComponent<WrapperProps> = ( { startTime, endTime, clientWidth, clientOffset } ) => {
+
+  const msToPixRatio = clientWidth / (endTime - startTime)
+
+  const [offset, setOffset] = useState(0)
+  const [zoom, setZoom] = useState(0)
+
+  let span = endTime - startTime
+  const start = startTime - ( span * 3 )
+  const end = endTime + ( span * 3 )
+  //const end = ( endTime + ( span * 3 ) > Date.now() ) ? Date.now() : ( endTime + (span * 3 ) ) 
+  let mySpan = end - start
+
+  let spanDiff = mySpan - span
+  console.info('span diff: ' + spanDiff)
+  console.info('my span ' + mySpan)
+
+  const myWidth = clientWidth + ( spanDiff * msToPixRatio )
+  const myOffset = - ( myWidth - clientWidth ) / 2
+
+  const handleWheel = ( e: WheelEvent ) => {
+    e.preventDefault()
+    setOffset( (prev) => prev + e.deltaY )
+  }    
+
+  useEffect( () => {
+    document.addEventListener( 'wheel', handleWheel, true )
+    return () => {
+      document.removeEventListener('wheel', handleWheel)
+    }
+  }, [] )
+
+  const logsInRange = selectRange(store.getState())(start, end)
+
+  const entries = logsInRange.map( (log) => {
+    let offset = (log.timestamp - start) * msToPixRatio
+    let width = log.timeSpent * msToPixRatio
+    let css = {
+      left: offset,
+      width: width
+    }
+    return ( <div className="timebar-entry" style={css} ></div> )
+  })
+
+  let css = {
+    width: myWidth,
+    left: myOffset,
+    transform: `translateX( ${offset} )`
+  }
+
+  return (
+    <div className="timebar-wrapper" style={css}  >
+      { entries } 
+    </div>
+  )
+    }
+
+
+  /*
 const useAnimationFrame = ( callback: Function ) => {
   const reqRef = useRef()
   const prevTs = useRef()
@@ -263,11 +331,20 @@ const useAnimationFrame = ( callback: Function ) => {
     return () => cancelAnimationFrame(reqRef.current)
   }, [])
 }
+   */
 
 // use zoomLevel ( timespan ) and offset / playheadPos / timestamp 
 // could do optional prop of scrollDelta, attach event handler in parent, pass as prop, only update translate IF scrollDelta != 0
 // use mutableRefObject<number> and pass as prop?
 // or could attach eventhandler in each and every one.
+
+interface EntryProps {
+  id: EntityId,
+  start: number,
+  end: number,
+  clientWidth: number
+}
+
 
 const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, start, end, clientWidth } ) => {
 
@@ -288,16 +365,13 @@ const TimeBarEntry: FunctionComponent<EntryProps> = ( { id, start, end, clientWi
 
   if ( log!.timestamp! > end || log!.timestamp! < start ) return null
 
-  const log = logsSelectors.selectById( store.getState(), id );
   if ( log == undefined || log.id == undefined ) return null
 
   const onClick = ( e: React.MouseEvent<HTMLDivElement> ) => {
-    //selectLogHook( id )
   }
 
   return (
     <div key={ log.id ? log.id : -1 } className="timebar-entry" style={css} />
-    </div>
   )
 }
 
