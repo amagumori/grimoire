@@ -134,9 +134,14 @@
 
   /* transition: left 0.5s, width 0.5s; */
 
+}
 
-
-
+.timebar-case {
+  position: absolute;
+  height: 12px;
+  will-change: transform;
+  translate: 0px;
+  transition: transform 0.2s ease-in-out;
 }
 
 .timebar-entry:hover {

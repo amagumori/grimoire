@@ -13,7 +13,7 @@ import './css/breathe.css';
 import store from './services/store'
 import { CreateDummyTaskButton, List } from './components/List'
 import { CLI } from './components/CLI-new'
-import { TimeBarContainer, TimeBar } from './components/New'
+import { TimeBar } from './components/New'
 import { TileView } from './components/Tiles'
 
 type currentPage =
@@ -29,8 +29,8 @@ const App: React.FC = () => {
 
   const tenDaysAgo = 86400 * 1000 * 10
   const oneDay = 86400 * 1000 
-  const defaultTimebarEnd = new Date( Date.now() )
-  const defaultTimebarStart = new Date( defaultTimebarEnd.getTime() - oneDay )
+  const defaultTimebarEnd = Date.now()
+  const defaultTimebarStart = defaultTimebarEnd - tenDaysAgo
 
   //console.table( store.getState().logs ) 
   
@@ -43,7 +43,7 @@ const App: React.FC = () => {
         <List listType="tasks" />
         <TileView />
         <div className="test-timebar-container">
-          <TimeBarContainer />
+          <TimeBar initialStart={defaultTimebarStart} initialEnd={defaultTimebarEnd} />
         </div>
       </div>
     </Provider>
