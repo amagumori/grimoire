@@ -11,9 +11,9 @@ import store, { useAppDispatch } from '../services/store'
 import { TaskItem, LogItem, ProjectItem } from './ListItem'
 
 interface ListProps {
-  listType: string
-  //tasks: EntityState<Task>
-  //logs: EntityState<Log>
+  listType: string,
+  activeTask: number,
+  setActiveTask: Function
 }
 
 export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
@@ -32,6 +32,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
     let elapsedTime = 35
 
     let dummyTask: Task = {
+      id: 0,
       active: true,
       description: desc,
       timestamp: timestamp,
@@ -61,6 +62,7 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
       let timeSpent = Math.floor( rand0 * 120 * 60000)
       let sector = Sector.programming
       let dummyLog: Log = {
+        id: 0,
         description: desc,
         timestamp: timestamp,
         timeSpent: timeSpent,
@@ -85,34 +87,27 @@ export const CreateDummyTaskButton: FunctionComponent<{}> = props => {
   )
 }
 
-export const List: FunctionComponent<ListProps> = ( props ) => {
+export const List: FunctionComponent<ListProps> = ( { listType, activeTask, setActiveTask } ) => {
 
   const dispatch = useAppDispatch()
-  //const [listType, tasks] = useState(0)
-  const [listType, logs] = useState(0)
-  //dispatch(fetchTasks())
 
-  const theLogs = useSelector(logsSelectors.selectAll)
   const theTasks = useSelector(tasksSelectors.selectAll); 
   
   useEffect( () => {
-    if ( props.listType === 'tasks' ) {
+    if ( listType === 'tasks' ) {
       dispatch(fetchTasks())
-    } else if ( props.listType === 'logs' ) {
+    } else if ( listType === 'logs' ) {
       dispatch(fetchLogs())
     }
   }, [dispatch])
  
-  if ( props.listType === 'tasks' ) {
+  if ( listType === 'tasks' ) {
     
     //const selectAllTasks = tasksSelectors.selectAll(store.getState())
     //console.log('tasks: ' + selectAllTasks);
     //console.log('tasks from selector: ' + JSON.stringify(theTasks));
-    const taskItems = theTasks.map( (task) => <TaskItem key={task.id} {...task} /> )
+    const taskItems = theTasks.map( (task) => <TaskItem key={task.id} id={task.id} activeTask={activeTask} setActiveTask={setActiveTask} /> )
 
-    //console.log('taskItems: ' + taskItems)
-
-        //<CreateDummyTaskButton />
     return (
       <div className="task-container">
         { taskItems }
@@ -121,7 +116,7 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
 
   }
 
-  if ( props.listType === 'projects' ) {
+  if ( listType === 'projects' ) {
     const allProjects = projectsSelectors.selectAll(store.getState().projects)
     const projects = allProjects.map( (project) => {
       return <ProjectItem {...project} />
@@ -134,7 +129,7 @@ export const List: FunctionComponent<ListProps> = ( props ) => {
     )
   }
 
-  if ( props.listType === 'logs' ) {
+  if ( listType === 'logs' ) {
     const allLogs = logsSelectors.selectAll(store.getState())
     const logs = allLogs.map( (log) => {
       <LogItem key={log.id} {...log} />

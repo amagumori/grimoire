@@ -32,6 +32,8 @@ const App: React.FC = () => {
   const defaultTimebarEnd = Date.now()
   const defaultTimebarStart = defaultTimebarEnd - tenDaysAgo
 
+  const [ activeTask, setActiveTask ] = useState(-1)
+
   //console.table( store.getState().logs ) 
   
   //<List listType="logs" tasks={store.getState().tasks} logs={store.getState().logs}/>
@@ -40,7 +42,7 @@ const App: React.FC = () => {
     <Provider store={store}>
       <div className="app">
       <div className="tasks-banner">Tasks</div>
-        <List listType="tasks" />
+        <List listType="tasks" activeTask={activeTask} setActiveTask={setActiveTask} />
         <TileView />
         <div className="test-timebar-container">
           <TimeBar initialStart={defaultTimebarStart} initialEnd={defaultTimebarEnd} />

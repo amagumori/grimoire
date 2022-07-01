@@ -26,6 +26,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
     "reflect-metadata": "^0.1.13",
+    "sunrise-sunset-js": "^2.2.1",
     "tsc-watch": "^4.5.0",
     "typescript": "^4.4.4",
     "web-vitals": "^1.1.2"

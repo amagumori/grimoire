@@ -196,19 +196,29 @@ interface LogFormProps {
   formState: string 
 }
 
+// https://stackoverflow.com/a/71146923
+
 const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker, updateTimespan, timestamp } ) => {
 
   const dispatch = useAppDispatch()
 
   const [ timeSpent, setTimeSpent ] = useState(0)
-  const [ textAreaActive, setTextAreaActive ] = useState(false)
+  const [ timeSpentValid, setTimeSpentValid ] = useState(false)
   const [sector, setSector] = useState<Sector>(Sector.none)
   const [description, setDesc] = useState('')
+  const [taskId, setTaskId] = useState(0)
+
+  const task = useSelector( ( state ) => tasksSelectors.selectById(store.getState(), taskId) )
+
+  const timeSpentRef = useRef<HTMLInputElement>(null)
+  const taskRef = useRef<HTMLInputElement>(null)  
+  const descRef = useRef<HTMLTextAreaElement>(null)  
 
   const tasks = useSelector( selectActiveTaskTitles )
 
   const onSubmit = ( e: React.SyntheticEvent ) => {
     let log: Log = {
+      id: 0,
       description: description,
       sector: sector,
       timestamp: timestamp,
@@ -219,6 +229,7 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
 
   const submitForm = () => {
     let log: Log = {
+      id: 0,
       description: description,
       sector: sector,
       timestamp: timestamp,
@@ -240,7 +251,23 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     updateTimespan(e)
     setTimeSpent(t * 60000) // in minutes
 
-    setTextAreaActive(true)
+    if ( isNaN(timeSpent) == false ) {
+      setTimeSpentValid(true)
+    }
+  }
+
+  const setTaskHook = ( id: number ) => {
+    setTaskId(id)
+    if ( descRef.current ) {
+      descRef.current.focus()
+    }
+  }
+
+  const setSectorHook = ( sector: Sector ) => {
+    setSector(sector)
+    if ( timeSpentRef.current ) {
+      timeSpentRef.current.focus()
+    }
   }
 
   const textAreaChange = ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
@@ -248,13 +275,20 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
   }
 
   const timeSpentKeyUp = ( e: React.KeyboardEvent<HTMLInputElement> ) => {
-    if ( e.key === 'Enter' ) {
-      // good lord.
-      submitForm()
+    
+    if ( e.code == 'Space' ) {
+      console.log('bepp')
+      if ( timeSpentValid == true ) {
+        if ( taskRef.current ) {
+          console.log('bempp')
+          taskRef.current.focus()
+        }
+      }
     }
   }
 
   const textAreaKeyup = ( e: React.KeyboardEvent<HTMLTextAreaElement> ) => {
+
     if ( e.key === 'Enter' ) {
       // good lord.
       submitForm()
@@ -265,19 +299,33 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     console.log('phooey')    
   }
 
-
   // now need to make it update timespan so we can create log
 
   if ( formState === 'log' ) {
   
     return (
       <form className="log-form" onSubmit={ onSubmit }>
-        <SectorInput active={true} sectorValue={sector} setSector={setSector} />
+        <SectorInput active={true} sectorValue={sector} setSector={setSectorHook} />
         <div className="time-spent-wrapper">
+          <div className="helptext">
+          TIME SPENT
+          </div>
           <input className="time-spent" onKeyUp={timeSpentKeyUp} onChange={setTimespan} onFocus={toggleOn} onBlur={toggleOff}></input>
         </div>
-        { textAreaActive === true ? <textarea onKeyUp={textAreaKeyup} onChange={textAreaChange} className="log-description" /> : null }
-        <HintListInput />
+        
+        <HintListInput hintType={"TASK"} selectHook={setTaskHook} reference={taskRef} />
+        <div className="poop">{ taskId != 0 ? taskId : "" }</div>
+      { task ?
+        (  <div className="progress">
+             <div className="helptext">PROGRESS %</div>
+             <div className="percentage-finished">{task.percentageFinished}</div> 
+           </div>
+         ) : <div></div>
+      } 
+        <div className="log-description" >
+          <div className="helptext">DESCRIPTION</div>
+          <textarea ref={descRef} onKeyUp={textAreaKeyup} onChange={textAreaChange} className="log-description" />
+        </div>
       </form>
     )
 
@@ -292,6 +340,9 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const dispatch = useAppDispatch()
 
   const [description, setDesc] = useState('')
+  const [taskId, setTaskId] = useState(0)
+
+  const taskRef = useRef<HTMLInputElement>(null)
 
   const timeLastWorked = Date.now()
 
@@ -304,6 +355,7 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   const onSubmit = ( e: React.SyntheticEvent ) => {
     e.preventDefault();
     let task: Task = {
+      id: 0,
       active: true,
       timestamp: timestamp,
       timeLastWorked: timeLastWorked,
@@ -315,8 +367,9 @@ const TaskForm: FunctionComponent<TaskFormProps> = ( { timestamp } ) => {
   }
 
   return (
-    <form onSubmit={ onSubmit }>
+    <form className="task-form" onSubmit={ onSubmit }>
       <input autoFocus className="task-description" onChange={descChange} value={description}></input>
+      <HintListInput hintType={"TASK"} selectHook={setTaskId} reference={taskRef} />
     </form>
   )
 }
@@ -328,7 +381,7 @@ interface SubTaskFormProps {
 interface SectorProps {
   active: boolean
   sectorValue: Sector
-  setSector: Function 
+  setSector: Function
 }
 
 const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, setSector } ) => {
@@ -376,62 +429,16 @@ const SectorInput: FunctionComponent<SectorProps> = ( { active, sectorValue, set
   }
 
   const onKeyup = ( e: React.KeyboardEvent ) => {
-    /*
-    const target = e.target as HTMLInputElement
-    if ( target.value === 'programming' || target.value === 'visual' ) {
-      setSectorValid(true)
-      active = false
-    } else {
-      setSectorValid(false)
-      active = false
+    if ( e.key === 'Backspace' ) {
+      setSector(Sector.none)
     }
-     */
-
-    /*
-    if ( sectorIsValid === true ) {
-      if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'ArrowRight' ) {
-        const form = target.form
-        if ( form != null ) {
-          const index = Array.prototype.indexOf.call( form, target )
-          if ( form.elements[index+1] != null ) {
-            let f = form.elements[index+1] as HTMLElement
-            f.focus()
-            //form.elements[index+1].focus()
-          }
-          e.preventDefault()
-        }
-        //setFormState("timespent")
-      
-      }
-     */
-      /*
-      if ( e.key === 'Space' || e.key === 'Tab' || e.key === 'ArrowRight' ) {
-        setFormState("timespent")
-      }
-       */
-      if ( e.key === 'Backspace' ) {
-        setSector(Sector.none)
-      }
-    //}
   }
 
   if ( !active ) return null;
-  
-  /*return (
-    <div className="sector" >
-      <div className="sector-input-wrapper">
-        <Hint options={sectorHints} allowTabFill onFill={handleFill} >
-          <input autoFocus className="cli-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
-        </Hint>
-      </div>
-      <SectorIcon active={sectorIsValid} sector={sectorValue} />
-    </div>
-  )
-  */
-
-  //<div className={ sectorIsValid ? "hidden" : "sector-input-wrapper" } > 
+ 
   return (
     <div className="sector" >
+      <div className="helptext">SECTOR</div>
       <Hint options={sectorHints} allowTabFill onFill={handleFill} >
         <input autoFocus className="sector-input" value={inputValue} onKeyUp={onKeyup} onChange={onChange}></input>
       </Hint>

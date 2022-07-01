@@ -200,6 +200,11 @@ export const selectRange = createSelector(
   (logs) => (start: number, end: number) => logs.filter( (log) => log.timestamp > start && log.timestamp < end )
 )
 
+export const selectAllWithTask = createSelector(
+  logsSelectors.selectAll,
+  (logs: Array<Log>) => (taskId: number) => logs.filter( (log) => log.taskId == taskId ),
+  (logs) => logs.sort( (a, b) => a.timestamp - b.timestamp )
+)
 
 export const selectLogs = (state: RootState) => state.logs
 

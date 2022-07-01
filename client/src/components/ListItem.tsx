@@ -1,10 +1,13 @@
 import React, { useState, FunctionComponent } from 'react';
 import { Task, Project, Log } from '../Types'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { tasksSelectors } from '../services/tasks'
+import { EntityId } from '@reduxjs/toolkit'
 
 import { HiTerminal,  HiCode } from 'react-icons/hi'
 import { IoColorPaletteSharp } from 'react-icons/io5'
 import { FcLowPriority } from 'react-icons/fc'
+
 
 import store from '../services/store'
 import { Sector } from '../Types'
@@ -13,32 +16,36 @@ type TaskProps = Task
 type ProjectProps = Project 
 type LogProps = Log 
 
-export const TaskItem: FunctionComponent<TaskProps> = ( {id, active, description, timestamp, timeLastWorked, percentageFinished, elapsedWorkTime, logs } ) => {
+interface TaskItemProps {
+  id: number,
+    activeTask: number,
+  setActiveTask: Function
+}
 
-  const stamp = new Date()
-  let month = stamp.getMonth() + 1
-  let day   = stamp.getDate()
+export const TaskItem: FunctionComponent<TaskItemProps> = ( {id, activeTask, setActiveTask } ) => { 
 
-  if ( timestamp != undefined && active === true ) {
-    stamp.setTime(timestamp)
-    month = stamp.getMonth() + 1
-    day = stamp.getDate()
-    // this is insanely gross
-  } else {
-    return null;
+  const task = tasksSelectors.selectById( store.getState(), id )
+  const d = new Date(task!.timestamp)
+  const month = d.getMonth()
+  const day = d.getDate()
+
+  if ( !task ) return null
+
+  const handleClick = ( e: React.MouseEvent<HTMLDivElement> ) => {
+    if ( activeTask != id ) {
+      setActiveTask( id )  
+    } else {
+      setActiveTask( -1 ) 
+    }
   }
 
-  if ( !active ) return null;
-
-  // lol
-  
   return (
-    <div className="taskEntry" key={ id } >
+    <div className="taskEntry" onClick={handleClick} key={ id } >
       <div className="date">
         { month } / { day } 
       </div>
       <FcLowPriority />
-      <div className="task-name"> { description } </div>
+      <div className="task-name"> { task.description } </div>
     </div>
   ) 
   

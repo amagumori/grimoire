@@ -12,8 +12,13 @@ import React, {
 import { useSelector } from 'react-redux'
 import { tasksSelectors, selectActiveTasks } from '../services/tasks'
 
+interface HintListProps {
+  hintType: string,
+  selectHook: Function,  // hook for marking the list item as picked.
+  reference: React.RefObject<HTMLInputElement>
+}
 
-export const HintListInput: FunctionComponent = ( ) => {
+export const HintListInput: FunctionComponent<HintListProps> = ( { hintType, selectHook, reference } ) => {
 
   // i literally just gave up on the inscrutable type errors.
   // after an hour with no discernable difference between the return type
@@ -87,6 +92,10 @@ export const HintListInput: FunctionComponent = ( ) => {
         setSelectedMatchIndex( selectedMatchIndex + 1 ) 
       }
     }
+
+    if ( e.key === 'Enter' || e.code == 'Space' ) {
+      selectHook( selectedMatchIndex )
+    }
   }
 
   const onChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
@@ -100,6 +109,10 @@ export const HintListInput: FunctionComponent = ( ) => {
       setMatches( foundMatches )
     }
 
+  }
+
+  const handleBlur = ( e: React.FocusEvent<HTMLInputElement> ) => {
+    //setMatches( [] )
   }
 
   const items = matches.map( (item, index) => {
@@ -119,13 +132,15 @@ export const HintListInput: FunctionComponent = ( ) => {
 
   if ( matches.length === 0 ) return (
     <div className="hint-list-input-wrapper">
-      <input className="hint-list-input" onChange={onChange} onKeyUp={onKey}></input>
+      <div className="helptext">{ hintType }</div>
+      <input className="hint-list-input" ref={reference} onChange={onChange} onKeyDown={onKey} onBlur={handleBlur} ></input>
     </div>
   )
 
   return (
     <div className="hint-list-input-wrapper">
-      <input className="hint-list-input" onChange={onChange} onKeyUp={onKey}></input>
+      <div className="helptext">{ hintType }</div>
+      <input className="hint-list-input" ref={reference} onChange={onChange} onKeyDown={onKey} onBlur={handleBlur} ></input>
       <div className="hint-list" ref={listRef} >
         { items }
       </div>

@@ -4,6 +4,13 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600&display=swap');
 
+@font-face {
+  font-family: 'NewCinemaA';
+  src: url('./newcinema.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .rah-input-wrapper {
   color: #eee;
   width: 50%;
@@ -107,6 +114,7 @@
   white-space: nowrap;
   border-radius: 2px;
   width: 100%;
+  max-width: 100%;
   background-color: #ccc;
 }
 
@@ -136,8 +144,12 @@
 
 }
 
+/* @TODO DISGUSTING HACK FIXME FIXME */
+.timebar-wrapper {
+  max-width: 80vw;
+}
+
 .timebar-case {
-  position: absolute;
   height: 12px;
   will-change: transform;
   translate: 0px;
@@ -152,6 +164,14 @@
   font-size: 18px;
 }
 
+.entry-view {
+  margin: 24px 24px 24px 0;
+}
+
+.entry-sector {
+  font-size: 36px;
+}
+
 .sector {
 }
 
@@ -163,7 +183,8 @@ body {
   background-color: #2a363b;
   color: #bbb;
   /* font: 0.75em "Didact Gothic", sans-serif; */
-  font: 12px 'Work Sans', sans-serif;
+  /* font: 12px 'Work Sans', sans-serif; */
+  font: 12px 'NewCinemaA', sans-serif;
   animation: movebg 8s;
   background-image: url("bg.svg"), url("bg.svg"); 
   background-repeat: repeat, repeat;
@@ -377,7 +398,6 @@ h1 {
   background: rgba(0, 96, 164, 0.7);
 }
 
-
 .speech-bubble { 
   position: relative;
   display: inline-block;
@@ -415,6 +435,18 @@ h1 {
   vertical-align: text-top;
 }
 
+textarea {
+  color: #bbb;
+  border: none;
+  resize: none;
+  background: #455961;
+}
+
+textarea:focus {
+  border: none;
+  outline-style: none;
+}
+
 .cli-wrapper {
   position: fixed;
   top: 50%;
@@ -434,23 +466,35 @@ h1 {
 }
 
 .cli {
-  display: inline-block;
+  width: 100%;
+  background: #455961;
+  display: inline-flex;
+}
+
+.task-form {
+  display: inline-flex;
+  width: 100%;
 }
 
 .log-form {
   display: inline-flex;
-}
-
-.log-button {
-  width: 2em;
+  width: 100%;
 }
 
 .sector-input-wrapper {
   color: #fff1cb;
 }
 
+.helptext {
+  position: absolute;
+  margin-top: -18px;
+  font-size: 10px;
+}
+
 .log-description {
   height: 16px;
+  display: inline-flex;
+  flex-grow: 1000;
 }
 
 .hint-list {
@@ -545,8 +589,7 @@ h1 {
 */
 
 .sector {
-  vertical-align: middle;
-  font-size: 18px;
+  font-size: 12px;
   color: #B8685A;
   margin: 0px 6px 0px 6px;
 }
@@ -591,7 +634,7 @@ h1 {
   position: relative;
   display: inline-block;
   border-radius: 2px;
-  padding: 0.5em;
+  padding: 2px 6px; 
   background: rgba(50, 185, 82, 0.7);
   animation: fade 0.75s ease-in-out;
 }
@@ -604,7 +647,7 @@ h1 {
 
 .tick-line {
   width: 100%;
-  position: relative;
+  margin-top: 12px;
 }
 
 .tick-mark {
@@ -636,12 +679,16 @@ tick-mark:nth-child(1) {
 }
 
 input {
+  color: #bbb;
   outline: none;
+  border: none;
+  padding: 3px;
   border-radius: 2px;
   background-color: #455961;
 }
 
 input:focus {
+  background-color: #458171;
   outline: none;
   background-image: none;
   -webkit-box-shadow: none;
