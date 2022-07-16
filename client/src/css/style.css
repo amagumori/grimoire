@@ -68,7 +68,30 @@
 
 
 .date-box {
+  border-radius: 1px;
+  border: 2px solid #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  width: fit-content;
+  padding: 3px;
+  background: #455961;
 
+}
+
+.box-month {
+  width: fit-content;
+  padding: 4px;
+  font-size: 16px;
+  bottom: 6px;
+  position: relative;
+}
+
+.box-slash {
+  font-size: 12px;
+}
+
+.box-date {
+  font-size: 11px;
 }
 
 .gg-arrow-down {
@@ -128,7 +151,6 @@
 
   position: relative;
   margin-bottom: 2px;
-  border-radius: 2px;
   display: inline-block;
   width: 100%;
   height: 100%;
@@ -147,6 +169,7 @@
 /* @TODO DISGUSTING HACK FIXME FIXME */
 .timebar-wrapper {
   max-width: 80vw;
+  overflow-x: clip;
 }
 
 .timebar-case {
@@ -166,6 +189,14 @@
 
 .entry-view {
   margin: 24px 24px 24px 0;
+}
+
+.entry-header {
+  display: inline-flex;
+}
+
+.entry-header > * {
+  margin: 0px 3px 0 0;
 }
 
 .entry-sector {
@@ -276,9 +307,27 @@ li {
 }
 
 .taskEntry {
-  display: inline-flex;
+  display: flex;
   width: 100%;
   animation: fadein 1.3s;
+}
+
+.taskEntry > * {
+  display: flex;
+}
+
+.task-date {
+
+  flex-basis: 1;
+
+  border-radius: 1px;
+  border: 2px solid #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  width: fit-content;
+  padding: 3px;
+  background: #455961;
+
 }
 
 .taskEntry:hover {
@@ -303,11 +352,11 @@ li {
   overflow: hidden;
 }
 
-/*
+
 .task-name {
-  grid-column: span 5;
+  flex-basis: auto;
 }
-*/
+
 
 h1 {
   font: 2em "Didact Gothic", sans-serif;
@@ -540,6 +589,21 @@ textarea:focus {
 }
 */
 
+.sun-bar {
+  height: 6px;
+}
+
+.sector-button {
+  background: #ff7951;
+  padding: 4px;
+  width: fit-content;
+  text-transform: uppercase;
+  color: white;
+  font-weight: bold;
+  font-size: 11px;
+  text-shadow: rgba(255, 255, 255, 0.5);
+}
+
 .hint-input-wrapper {
   height: 16px;
 }
@@ -647,15 +711,14 @@ textarea:focus {
 
 .tick-line {
   width: 100%;
-  margin-top: 12px;
 }
 
 .tick-mark {
   border-left: 1px solid #ccc;
   height: 8px;
-  position: absolute;
+  position: relative;
 }
-
+/*
 tick-mark:nth-child(1) {
   left: 0%;
 }
@@ -677,6 +740,7 @@ tick-mark:nth-child(1) {
 .tick-mark:nth-child(7) {
   left: 100%;
 }
+*/
 
 input {
   color: #bbb;

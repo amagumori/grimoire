@@ -33,7 +33,7 @@
   },
   "scripts": {
     "watch": "tsc -w",
-    "start": "react-scripts start",
+    "start": "FAST_REFRESH=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -6,11 +6,14 @@ import { EntityState, EntityId } from '@reduxjs/toolkit'
 import { fetchLogs, selectLogs, logsSelectors, makeSelectByTimestamp, select24h, selectRange, makeSelectRange } from '../services/logs'
 import store, { useAppDispatch } from '../services/store'
 import { Draggable, EndMarker } from './Draggable'
-import { CLI } from './CLI-new'
+import { CLI } from './CLI'
 
 import { getSunrise, getSunset } from 'sunrise-sunset-js'
 
 import { BiBody, BiCctv, BiShapePolygon, BiCycling, BiDna, BiEqualizer } from 'react-icons/bi'
+
+const myLatitude = 45.5208891606035
+const myLongitude = -122.63695355201227
 
 interface TimeBarProps {
   initialStart: number, 
@@ -76,7 +79,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { initialStart, initia
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ playheadPos } />
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
         <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
-        <TimebarCase start={Date.now() - (86400000*14) } end={Date.now()} clientWidth={clientWidth} setLogHook={setCurrentLogId} />
+        <TimebarCase start={Date.now() - (86400000*148) } end={Date.now()} clientWidth={clientWidth} setLogHook={setCurrentLogId} />
       </div>
   
       <EntryView id={currentLogId} hidden={false} />
@@ -99,28 +102,43 @@ interface CaseProps {
 
 const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, setLogHook } ) => {
 
+  // 3 months
+  // the default length of time represented by the bar of -clientWidth-.
+  const defaultZoomSpan = 2629800000 * 3
+
+  const [ zoomSpan, setZoomSpan ] = useState(defaultZoomSpan)
+
   const [ width, setWidth ] = useState(clientWidth)
 
   const span = end - start
+
+  const [ caseStart, setCaseStart ] = useState( start )
+  const [ caseEnd, setCaseEnd ] = useState( end ) 
+
   const zoomFactor = 0.5;
   const msToPixRatio = width / span 
-  const pixToMsRatio = span / width 
+  const pixToMsRatio = (span / width == Infinity) ? 0 : ( span / width ) 
 
   const [ offset, setOffset ] = useState(0)
   const [ zoom, setZoom ] = useState(1)
   const [ shiftPressed, setShiftPressed ] = useState(false)
 
+    
   const myStart = Math.min( start, (  start - ( ( width / clientWidth ) * span * pixToMsRatio ) / 2 ) ) 
-  const myEnd = Math.max( end, (  end + ( ( width / clientWidth ) * span * pixToMsRatio ) / 2 ) ) 
-  //const myEnd = end + ( ( zoom * zoomFactor ) * pixToMsRatio )
+  const myEnd = Math.max( end, (  end + ( ( width / clientWidth ) * span * pixToMsRatio ) / 2 ) )
+     
 
   const handleWheel = ( e: WheelEvent ) => {
     e.preventDefault()
     if ( e.shiftKey ) {
       console.info('yes')
       setWidth( (prev) => (prev + e.deltaY * zoomFactor) > 0 ? ( prev+e.deltaY * zoomFactor ) : 0 ) 
+      setCaseStart( (prev) => prev - ( offset * pixToMsRatio ) )
+      setCaseEnd( (prev) => prev + ( offset * pixToMsRatio ) )
     } else {
       setOffset( (prev) => prev + e.deltaY )
+      setCaseStart( (prev) => prev - ( offset * pixToMsRatio ) )
+      setCaseEnd( (prev) => prev + ( offset * pixToMsRatio ) )
     }
   }    
 
@@ -132,14 +150,16 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
     }
   }, [])
 
-  const logsInRange = selectRange(store.getState())(myStart, myEnd)
- 
+  const logsInRange = selectRange(store.getState())(start, end) 
+
+
+  // position the entries with very, very high precision decimal pct value
   const entries = logsInRange.map( (log) => {
-    let offset = (log.timestamp - start) * msToPixRatio
-    let width = log.timeSpent * msToPixRatio
+    let pctOffset = ( (log.timestamp - start) / span ) * 100
+    let pctWidth = ( log.timeSpent / span ) * 100
     let css = {
-      left: offset,
-      width: width
+      left: `${pctOffset}%`,
+      width: `${pctWidth}%`
     }
     return ( <div className="timebar-entry" key={log.id} style={css} onClick={ ( e ) => setLogHook(log.id) } ></div> )
   })
@@ -149,25 +169,57 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
     transform: `translateX(${offset}px)`
   }
 
+  const caseStartTimestamp = start - ( offset * pixToMsRatio )
+  const caseEndTimestamp = end + ( offset * pixToMsRatio ) 
+  const caseSpan = caseEndTimestamp - caseStartTimestamp 
 
-  let tickTime = new Date( start - ( offset * pixToMsRatio ) )
-  let tickEnd = new Date(tickTime.getTime() + ( clientWidth * pixToMsRatio ) )
+  const numTicks = 8
+  const ticks = [ ...Array(numTicks)].map( (e, i) => {
+    let offset = (i/numTicks) * ( caseEnd - caseStart ) 
+    return ( 
+      <div className="tick-mark" style={ { left: `${(i/numTicks) * 100}%` } }>
+        { new Date( caseStart + offset ).toLocaleDateString([], { day: 'numeric', month: 'numeric' }) }
+      </div>
+    )
 
-  let tickSpan = tickEnd.getTime() - tickTime.getTime()
-  let tickPeriod = tickSpan / 7
+  })
 
+    /*
+  let tickPeriod = caseSpan / 8
+  let tickTime = new Date( caseStartTimestamp ) 
+  let tickFormat = 'date'
   let ticks = []
 
-  for ( let i=0; i < 7; i++ ) {
+  for ( let i=0; i < 8; i++ ) {
     let offset = tickPeriod * i;
     tickTime.setTime( tickTime.getTime() + offset );
-    ticks.push( (<div className="tick-mark">{ tickTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }</div> ) );
-    //console.log( tickTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) );
+    
+    if ( tickFormat == 'time' ) {
+      ticks.push( (<div className="tick-mark">{ tickTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }</div> ) );
+    } else if ( tickFormat == 'date' ) {
+      ticks.push( (<div className="tick-mark">{ tickTime.toLocaleDateString([], { day: 'numeric', month: 'numeric' }) }</div> ) );
+    } else {
+      console.log('whoops')
+    }
   }
+  */
+
+
+  const sunriseColor = "#d9b7b8"
+  const noonColor = "#b8d3de"
+  const sunsetColor = "#a53b34"
+  const nightColor = "#605d65"
+
+  let startDate = new Date( Math.trunc(caseStartTimestamp) ).toLocaleString('en-US')
+  let endDate = new Date( Math.trunc(caseEndTimestamp) ).toLocaleString('en-US')
 
   return (
     <div className="timebar-wrapper">
       <div className="timebar-case" style={css}>{entries}</div>
+
+      <div className="sector-button">{ startDate }</div>
+      <div className="sector-button">{ endDate }</div>
+
       <div className="tick-line">
         { ticks }
       </div>
@@ -245,11 +297,16 @@ const EntryView: FunctionComponent<EntryViewProps> = ( { id, hidden } ) => {
   */
 
   //<span className="entry-time">{ start.getHours() }:{start.getMinutes()} - { end.getHours() }:{ end.getMinutes() }</span>
+  //
+  let date = new Date(+log.timestamp)
   return (
     <div key={ log.id } className="entry-view">
-      <div className="entry-sector">{ logIcon }</div>
-      <div className="entry-time">{ new Date(+log.timestamp).toLocaleString('en-US') }</div>
-      <div className="entry-time">{ log.timeSpent }</div>
+      <div className="entry-header">
+        <div className="date-box"> { date.toDateString().substring(4, 7) + " " + date.getDate() } </div>
+        <div className="sector-button">{ date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric' }) }</div>
+        <div className="sector-button">{ log.sector }</div>
+      </div> 
+      <div className="entry-time">{ Math.trunc( log.timeSpent / 60000 ) } min</div>
       <div className="entry-description">{log.description}</div>
     </div>
   )

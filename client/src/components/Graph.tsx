@@ -14,8 +14,9 @@ export const TaskGraph: FunctionComponent<TaskGraphProps> = ( { id, activeTask, 
 
   const dispatch = useAppDispatch()
 
-  const task = useSelector( selectAllWithTask( store.getState())(id) ) 
-  if ( !task ) return null
+
+  const logs = selectAllWithTask(store.getState() )(id)
+  if ( !logs ) return null
 
   const divs = logs.map( (log) => ( <div className="graph-line"></div> ) )
 

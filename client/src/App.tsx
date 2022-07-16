@@ -6,14 +6,16 @@ import "reflect-metadata";
 import React, { useState, Component } from 'react';
 import { Provider } from 'react-redux';
 
+import { TaskGraph } from './components/Graph'
+
 import './css/style.css';
 import './css/breathe.css';
 
 //import { rootReducer, RootState } from './services/store'
 import store from './services/store'
 import { CreateDummyTaskButton, List } from './components/List'
-import { CLI } from './components/CLI-new'
-import { TimeBar } from './components/New'
+import { CLI } from './components/CLI'
+import { TimeBar } from './components/TimeBar'
 import { TileView } from './components/Tiles'
 
 type currentPage =

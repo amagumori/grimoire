@@ -2,6 +2,7 @@ import React, { useState, FunctionComponent } from 'react';
 import { Task, Project, Log } from '../Types'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { tasksSelectors } from '../services/tasks'
+import { selectAllWithTask } from '../services/logs'
 import { EntityId } from '@reduxjs/toolkit'
 
 import { HiTerminal,  HiCode } from 'react-icons/hi'
@@ -25,7 +26,13 @@ interface TaskItemProps {
 export const TaskItem: FunctionComponent<TaskItemProps> = ( {id, activeTask, setActiveTask } ) => { 
 
   const task = tasksSelectors.selectById( store.getState(), id )
-  const d = new Date(task!.timestamp)
+  const associatedLogs = selectAllWithTask( store.getState() )(id)
+
+  console.info( associatedLogs )
+
+  let ts = task!.timestamp.toString()
+  let num = parseInt(ts)
+  const d = new Date(num)
   const month = d.getMonth()
   const day = d.getDate()
 
@@ -41,7 +48,7 @@ export const TaskItem: FunctionComponent<TaskItemProps> = ( {id, activeTask, set
 
   return (
     <div className="taskEntry" onClick={handleClick} key={ id } >
-      <div className="date">
+      <div className="date-box">
         { month } / { day } 
       </div>
       <FcLowPriority />
