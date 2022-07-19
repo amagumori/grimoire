@@ -79,7 +79,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { initialStart, initia
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ playheadPos } />
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
         <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
-        <TimebarCase start={Date.now() - (86400000*148) } end={Date.now()} clientWidth={clientWidth} setLogHook={setCurrentLogId} />
+        <TimebarCase start={Date.now() - (86400000*365) } end={Date.now()} clientWidth={clientWidth} setLogHook={setCurrentLogId} />
       </div>
   
       <EntryView id={currentLogId} hidden={false} />
@@ -106,18 +106,20 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
   // the default length of time represented by the bar of -clientWidth-.
   const defaultZoomSpan = 2629800000 * 3
 
-  const [ zoomSpan, setZoomSpan ] = useState(defaultZoomSpan)
+  //const [ zoomSpan, setZoomSpan ] = useState(defaultZoomSpan)
 
+  // use a float to store zoomFactor to scale our pixToMsRatio
+  const [ zoomFactor, setZoomFactor ] = useState(1.0);
+    
   const [ width, setWidth ] = useState(clientWidth)
 
   const span = end - start
 
-  const [ caseStart, setCaseStart ] = useState( start )
-  const [ caseEnd, setCaseEnd ] = useState( end ) 
+  const [ caseStart, setCaseStart ] = useState( 0)
+  const [ caseEnd, setCaseEnd ] = useState( 0 ) 
 
-  const zoomFactor = 0.5;
-  const msToPixRatio = width / span 
-  const pixToMsRatio = (span / width == Infinity) ? 0 : ( span / width ) 
+  const msToPixRatio = width / span
+  const pixToMsRatio = (span / width == Infinity) ? 0 : ( span / width )
 
   const [ offset, setOffset ] = useState(0)
   const [ zoom, setZoom ] = useState(1)
@@ -132,11 +134,18 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
     e.preventDefault()
     if ( e.shiftKey ) {
       console.info('yes')
-      setWidth( (prev) => (prev + e.deltaY * zoomFactor) > 0 ? ( prev+e.deltaY * zoomFactor ) : 0 ) 
+      setZoomFactor( (prev) => prev * 1.111 );
+      if ( e.deltaY >= 0 ) {
+        setWidth( (prev) => (prev + e.deltaY * zoomFactor))
+      } else {
+        setWidth( (prev) => (prev + e.deltaY * (1/zoomFactor)) )
+      }
+      //setWidth( (prev) => (prev + e.deltaY * zoomFactor) > 0 ? ( prev+e.deltaY * zoomFactor ) : 0 ) 
       setCaseStart( (prev) => prev - ( offset * pixToMsRatio ) )
       setCaseEnd( (prev) => prev + ( offset * pixToMsRatio ) )
     } else {
-      setOffset( (prev) => prev + e.deltaY )
+      // think in terms of time.  offset in time then convert to a pix value.
+      setOffset( (prev) => prev + ( e.deltaY + 0.00001 ) )
       setCaseStart( (prev) => prev - ( offset * pixToMsRatio ) )
       setCaseEnd( (prev) => prev + ( offset * pixToMsRatio ) )
     }
@@ -152,14 +161,19 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
 
   const logsInRange = selectRange(store.getState())(start, end) 
 
+  function strip( num: any ) {
+    return ( parseFloat(num).toPrecision(12))
+  }
 
   // position the entries with very, very high precision decimal pct value
   const entries = logsInRange.map( (log) => {
     let pctOffset = ( (log.timestamp - start) / span ) * 100
+    let off = strip(pctOffset)
     let pctWidth = ( log.timeSpent / span ) * 100
+    let wi = strip(pctWidth)
     let css = {
-      left: `${pctOffset}%`,
-      width: `${pctWidth}%`
+      left: `${off}%`,
+      width: `${wi}%`
     }
     return ( <div className="timebar-entry" key={log.id} style={css} onClick={ ( e ) => setLogHook(log.id) } ></div> )
   })
