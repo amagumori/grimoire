@@ -110,10 +110,15 @@ export const List: FunctionComponent<ListProps> = ( { listType, activeTask, setA
 
     return (
       <div className="task-container">
+        <CreateDummyTaskButton />
         { taskItems }
       </div>
     )
 
+  }
+
+  if ( listType === 'habits' ) {
+    // here
   }
 
   if ( listType === 'projects' ) {

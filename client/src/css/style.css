@@ -133,7 +133,7 @@
 
 .timebar {
   height: 12px;
-  overflow: hidden;
+  /* overflow: hidden; */
   white-space: nowrap;
   border-radius: 2px;
   width: 100%;

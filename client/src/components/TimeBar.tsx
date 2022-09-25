@@ -3,7 +3,7 @@ import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState, EntityId } from '@reduxjs/toolkit'
 
-import { fetchLogs, selectLogs, logsSelectors, makeSelectByTimestamp, select24h, selectRange, makeSelectRange } from '../services/logs'
+import { fetchLogs, selectLogs, logsSelectors, makeSelectByTimestamp, select24h, selectRange, makeSelectRange, selectMinMax } from '../services/logs'
 import store, { useAppDispatch } from '../services/store'
 import { Draggable, EndMarker } from './Draggable'
 import { CLI } from './CLI'
@@ -64,7 +64,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { initialStart, initia
   }
 
   useEffect( () => {
-    dispatch( fetchLogs() )
+    //dispatch( fetchLogs() )
     setLoaded(true)
     if ( timebarRef.current != null ) {
       setClientWidth( timebarRef.current.offsetWidth )
@@ -79,7 +79,7 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { initialStart, initia
         <Draggable hidden={false} classString="gg-pin-alt playhead" setPlayheadPos={ setPlayheadPos } parentWidth={ clientWidth } parentX={ clientOffset } nowOffset={ playheadPos } />
         <TimeSpan hidden={spanMarkerHidden} offset={ playheadPos } width={ endMarkerPos } /> 
         <EndMarker hidden={spanMarkerHidden} offset={ playheadPos + endMarkerPos } />
-        <TimebarCase start={Date.now() - (86400000*365) } end={Date.now()} clientWidth={clientWidth} setLogHook={setCurrentLogId} />
+        <TimebarCase clientWidth={clientWidth} setLogHook={setCurrentLogId} />
       </div>
   
       <EntryView id={currentLogId} hidden={false} />
@@ -94,12 +94,112 @@ export const TimeBar: FunctionComponent<TimeBarProps> = ( { initialStart, initia
 // 
 
 interface CaseProps {
-  start: number,
-    end: number,
   clientWidth: number,
   setLogHook: Function
 }
 
+const TimebarCase: FunctionComponent<CaseProps> = ( { clientWidth, setLogHook } ) => {
+  
+  const bounds = useSelector( selectMinMax )
+  const newest = bounds[0]
+  const oldest = bounds[1]
+
+  const dispatch = useAppDispatch()
+  const [viewSpan, setViewSpan] = useState(0)
+  const [start, setStart] = useState(0)
+  const [end, setEnd] = useState(0)
+
+  const [zoom, setZoom] = useState(1)
+  const [width, setWidth] = useState(clientWidth)
+  const [offset, setOffset] = useState(0)
+
+  const [ span, setSpan ] = useState(0)
+
+  const [ pixRatio, setPixRatio ] = useState( 0 ) 
+  const [ msRatio, setMsRatio ] = useState( 0 )
+   
+  const handleWheel = ( e: WheelEvent ) => {
+    e.preventDefault()
+    if ( e.shiftKey ) {
+      if ( e.deltaY >= 0 ) {
+        setViewSpan( (prev) => prev * 1.1 )
+        // add to start and end based on mouseX
+      } else {
+        setViewSpan( (prev) => prev * .98 )
+      }
+    } else {
+      // think in terms of time.  offset in time then convert to a pix value.
+      // NOW WE'RE DOING IN PERCENT OFFSET
+      setOffset( (prev) => {
+        let s = e.deltaY * 0.1
+        console.info( 's: ' + s)
+        console.info( 'pixRatio: ' + pixRatio)
+
+        return prev + s
+      })
+      setStart( (prev) => prev + ( offset * pixRatio ))
+      setEnd( (prev) => prev + ( offset * pixRatio ))
+    }
+  }    
+
+  useEffect( () => {
+    if ( bounds != undefined && bounds[0] != undefined ) {
+      setSpan( bounds[0].timestamp - bounds[1].timestamp )
+      setViewSpan(span)
+      setStart( parseInt(bounds[1].timestamp) )
+      setEnd( parseInt(bounds[0].timestamp) )
+      // set start timestamp
+      setPixRatio( width / span )
+      setMsRatio( span / width )
+    }
+    console.info('span here: ' + span )
+  }, [ bounds ] )
+
+  useEffect( () => {
+    dispatch( fetchLogs() )
+    
+    setWidth( clientWidth*2 )
+    document.addEventListener( 'wheel', handleWheel, true )
+    return () => {
+      document.removeEventListener('wheel', handleWheel)
+    }
+  }, [clientWidth])
+
+  const logsInRange = selectRange(store.getState())(start, end) 
+
+  const entries = logsInRange.map( (log) => {
+    let pctOffset = ( (log.timestamp - start) / span ) * 100
+    //let off = strip(pctOffset)
+    let pctWidth = ( log.timeSpent / (span) ) * 100
+    //let wi = strip(pctWidth)
+    let css = {
+      left: `${pctOffset}%`,
+      width: `${pctWidth}%`
+    }
+    return ( <div className="timebar-entry" key={log.id} style={css} onClick={ ( e ) => setLogHook(log.id) } ></div> )
+  })
+
+  let css = {
+    width: width,
+    transform: `translateX(${offset}%)`
+  }
+
+  return (
+    <div className="timebar-wrapper">
+      <div className="timebar-case" style={css}>{entries}</div>
+
+      <div className="sector-button">{ new Date(start).toLocaleString('en-US') }</div>
+      <div className="sector-button">{ new Date(end).toLocaleString('en-US') }</div>
+
+      <div className="sector-button">{ pixRatio }%</div>
+      <div className="sector-button">{ start }%</div>
+      <div className="sector-button">{ end }%</div>
+    </div>
+  )
+
+
+}
+  /*
 const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, setLogHook } ) => {
 
   // 3 months
@@ -134,30 +234,62 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
     e.preventDefault()
     if ( e.shiftKey ) {
       console.info('yes')
-      setZoomFactor( (prev) => prev * 1.111 );
+      //setZoomFactor( (prev) => prev * 1.111 );
       if ( e.deltaY >= 0 ) {
-        setWidth( (prev) => (prev + e.deltaY * zoomFactor))
+        setZoomFactor( (prev) => prev * 2 ) ;
+        setWidth( (prev) => prev * 2)
+        // @TODO deleteme
+        //setOffset( (prev) => prev * (1/ ( width / clientWidth ) ) )
       } else {
-        setWidth( (prev) => (prev + e.deltaY * (1/zoomFactor)) )
+        setZoomFactor( (prev) => prev * (0.5) );
+        setWidth( (prev) => (prev * 0.5 ) )
       }
       //setWidth( (prev) => (prev + e.deltaY * zoomFactor) > 0 ? ( prev+e.deltaY * zoomFactor ) : 0 ) 
       setCaseStart( (prev) => prev - ( offset * pixToMsRatio ) )
       setCaseEnd( (prev) => prev + ( offset * pixToMsRatio ) )
     } else {
       // think in terms of time.  offset in time then convert to a pix value.
-      setOffset( (prev) => prev + ( e.deltaY + 0.00001 ) )
+      // NOW WE'RE DOING IN PERCENT OFFSET
+      setOffset( (prev) => {
+        let s = prev + ( e.deltaY * 0.01 )
+        if ( s <= -100 ) {
+          s = -100
+        } else if ( s >= 100 ) {
+          s = 100
+        }
+        return s
+
+          /*
+        let dxRatio = ( (e.deltaY*0.1) / width ) * 100
+        console.info(e.deltaY*0.1)
+        console.info((e.deltaY*0.1)/width)
+        dxRatio += prev
+        console.info(dxRatio)
+        return dxRatio 
+           
+        
+          /*
+        if ( prev <= -100 ) {
+          dxRatio = -100
+        } else if ( prev >= 100 ) {
+          dxRatio = 100
+        } 
+        return dxRatio
+        //return dxRatio * span
+           
+      })
       setCaseStart( (prev) => prev - ( offset * pixToMsRatio ) )
       setCaseEnd( (prev) => prev + ( offset * pixToMsRatio ) )
     }
   }    
 
   useEffect( () => {
-    setWidth( clientWidth )
+    setWidth( clientWidth*2 )
     document.addEventListener( 'wheel', handleWheel, true )
     return () => {
       document.removeEventListener('wheel', handleWheel)
     }
-  }, [])
+  }, [clientWidth])
 
   const logsInRange = selectRange(store.getState())(start, end) 
 
@@ -166,10 +298,11 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
   }
 
   // position the entries with very, very high precision decimal pct value
+  
   const entries = logsInRange.map( (log) => {
-    let pctOffset = ( (log.timestamp - start) / span ) * 100
+    let pctOffset = ( (log.timestamp - start) / (span*zoomFactor) ) * 100
     let off = strip(pctOffset)
-    let pctWidth = ( log.timeSpent / span ) * 100
+    let pctWidth = ( log.timeSpent / (span*zoomFactor) ) * 100
     let wi = strip(pctWidth)
     let css = {
       left: `${off}%`,
@@ -178,13 +311,33 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
     return ( <div className="timebar-entry" key={log.id} style={css} onClick={ ( e ) => setLogHook(log.id) } ></div> )
   })
   
+  
+    /*
+  const entries = logsInRange.map( (log) => {
+    let pctOffset = ( (log.timestamp - start) / span ) * width
+    //let off = strip(pctOffset)
+    let pctWidth = ( log.timeSpent / span ) * width 
+    let css = {
+      left: `${pctOffset}px`,
+      width: `${pctWidth}%`
+    }
+    return ( <div className="timebar-entry" key={log.id} style={css} onClick={ ( e ) => setLogHook(log.id) } ></div> )
+  })
+     
+
+  
   let css = {
     width: width,
-    transform: `translateX(${offset}px)`
+    transform: `translateX(${offset}%)`
   }
 
-  const caseStartTimestamp = start - ( offset * pixToMsRatio )
-  const caseEndTimestamp = end + ( offset * pixToMsRatio ) 
+  // can do this now bc percentage
+  const caseStartTimestamp = start - ( (0.001 * offset) * width ) * pixToMsRatio
+  const caseEndTimestamp = end + ( (0.001 * offset) * span )
+  //const caseStartTimestamp = start - ( (offset/width) * span )
+  //const caseStartTimestamp = start - ( offset * pixToMsRatio )
+  //const caseEndTimestamp = start + ( (offset+clientWidth) * pixToMsRatio ) 
+  //const caseEndTimestamp = end - ( (width+offset) * pixToMsRatio ) 
   const caseSpan = caseEndTimestamp - caseStartTimestamp 
 
   const numTicks = 8
@@ -216,7 +369,7 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
       console.log('whoops')
     }
   }
-  */
+  
 
 
   const sunriseColor = "#d9b7b8"
@@ -235,11 +388,15 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { start, end, clientWidth, s
       <div className="sector-button">{ endDate }</div>
 
       <div className="tick-line">
+        <div className="sector-button">{ pixToMsRatio }%</div>
+        <div className="sector-button">{ ((0.001*offset) * span)} min</div>
         { ticks }
       </div>
     </div>
   )
 }
+     */
+
 
 interface TimeSpanProps {
   hidden: boolean

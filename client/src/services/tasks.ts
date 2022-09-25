@@ -98,7 +98,7 @@ export const tasksSlice = createSlice({
         return byId
       }, {})
 
-      console.log('byId: ' + JSON.stringify(byId))
+      //console.log('byId: ' + JSON.stringify(byId))
       //state.entities = byId
       //state.ids = Object.keys(byId)
       //

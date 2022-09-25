@@ -28,7 +28,7 @@ export const TaskItem: FunctionComponent<TaskItemProps> = ( {id, activeTask, set
   const task = tasksSelectors.selectById( store.getState(), id )
   const associatedLogs = selectAllWithTask( store.getState() )(id)
 
-  console.info( associatedLogs )
+  //console.info( associatedLogs )
 
   let ts = task!.timestamp.toString()
   let num = parseInt(ts)

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { useAppDispatch } from '../services/store'
 import { Hint } from './Hint'
 import { HintListInput } from './MyHintList'
-import { Log, Task, Sector } from '../Types'
+import { Log, Task, Sector } from '../Types'  // and Habit
 import { EntityState } from '@reduxjs/toolkit'
 import store from '../services/store'
 import '../css/breathe.css'
@@ -137,6 +137,11 @@ const ActionInputTwo: React.FC<ActionProps> = ( { active, formState, setFormStat
         setInputValue("")
         break
       }
+      case "habit": {
+        setFormState("habit")
+        setInputValue("")
+        break
+      }
       case "subtask": {
         setFormState("subtask")
         setInputValue("")
@@ -177,7 +182,12 @@ const ActionInputTwo: React.FC<ActionProps> = ( { active, formState, setFormStat
     return (
       <div className="log-button">TASK</div>
     )
-  } 
+  }
+  if ( formState === 'habit' ) {
+    return (
+      <div className="log-button">HABIT</div>
+    )
+  }
   if ( formState === 'project' ) {
     return (
       <div className="log-button">PROJECT</div>
@@ -330,6 +340,39 @@ const LogForm: FunctionComponent<LogFormProps> = ( { formState, toggleSpanMarker
     )
 
   } else return null;
+}
+  
+const HabitForm: FunctionComponent = ( ) => {
+  const dispatch = useAppDispatch()
+
+  const [description, setDesc] = useState('')
+  const [sector, setSector] = useState<Sector>(Sector.none)
+
+  const descChange = ( e: React.ChangeEvent<HTMLInputElement> ) => {
+    setDesc(e.target.value) 
+  }
+
+  const now = new Date( Date.now() )
+
+  const onSubmit = ( e: React.SyntheticEvent ) => {
+    e.preventDefault();
+    /*
+    let habit: Habit = {
+      id: 0,
+      active: true,
+      timestamp: Date.now(),
+      description: description
+    }
+    dispatch( createHabit ( habit ) )      
+     */
+  }
+
+  return (
+    <form className="task-form" onSubmit={ onSubmit }>
+      <SectorInput active={true} sectorValue={sector} setSector={setSector} />
+      <input autoFocus className="task-description" onChange={descChange} value={description}></input>
+    </form>
+  )
 }
 
 interface TaskFormProps {
