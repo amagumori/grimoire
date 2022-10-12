@@ -171,6 +171,17 @@ export const selectMinMax = createSelector( logsSelectors.selectAll, logs => {
   return [ logs[0], logs[ logs.length - 1 ] ]
 })
 
+export const oldestLog = createSelector( logsSelectors.selectAll, logs => {
+  logs.sort( (a, b) => b.timestamp - a.timestamp )
+  return logs[ logs.length - 1 ]
+})
+
+export const lastLog = createSelector( logsSelectors.selectAll, logs => {
+  logs.sort( (a, b) => b.timestamp - a.timestamp )
+  return logs[ 0 ]
+})
+
+
 export const makeSelectByTimestamp = (ts: number) => {
   const sel = createSelector(
     logsSelectors.selectAll,
@@ -204,13 +215,6 @@ export const selectRange = createSelector(
 export const selectAllWithTask = createSelector(
   logsSelectors.selectAll,
   (logs: Array<Log>) => (taskId: number) => logs.filter( (log) => log.taskId == taskId ),
-)
-
-export const oldestLog = createSelector( 
-  logsSelectors.selectAll,
-  logs => logs.reduce( (prev, curr) => {
-    return prev.timestamp < curr.timestamp ? prev : curr;
-  })
 )
 
 export const selectLogs = (state: RootState) => state.logs

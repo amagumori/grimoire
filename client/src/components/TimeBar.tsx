@@ -3,7 +3,7 @@ import { Log } from '../Types'
 import { useDispatch, useSelector } from 'react-redux'
 import { EntityState, EntityId } from '@reduxjs/toolkit'
 
-import { fetchLogs, selectLogs, logsSelectors, makeSelectByTimestamp, select24h, selectRange, makeSelectRange, selectMinMax } from '../services/logs'
+import { fetchLogs, oldestLog, selectLogs, logsSelectors, makeSelectByTimestamp, select24h, selectRange, makeSelectRange, selectMinMax } from '../services/logs'
 import store, { useAppDispatch } from '../services/store'
 import { Draggable, EndMarker } from './Draggable'
 import { CLI } from './CLI'
@@ -100,14 +100,19 @@ interface CaseProps {
 
 const TimebarCase: FunctionComponent<CaseProps> = ( { clientWidth, setLogHook } ) => {
   
+  /* 
   const bounds = useSelector( selectMinMax )
   const newest = bounds[0]
   const oldest = bounds[1]
+   */
 
   const dispatch = useAppDispatch()
+
+  const oldest = useSelector( oldestLog ) 
+
   const [viewSpan, setViewSpan] = useState(0)
-  const [start, setStart] = useState(0)
-  const [end, setEnd] = useState(0)
+  const [start, setStart] = useState( Date.now() - 2629800000 ) 
+  const [end, setEnd] = useState( Date.now() ) 
 
   const [zoom, setZoom] = useState(1)
   const [width, setWidth] = useState(clientWidth)
@@ -115,7 +120,7 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { clientWidth, setLogHook } 
 
   const [ span, setSpan ] = useState(0)
 
-  const [ pixRatio, setPixRatio ] = useState( 0 ) 
+  const [ pixRatio, setPixRatio ] = useState( 0 )
   const [ msRatio, setMsRatio ] = useState( 0 )
    
   const handleWheel = ( e: WheelEvent ) => {
@@ -130,35 +135,42 @@ const TimebarCase: FunctionComponent<CaseProps> = ( { clientWidth, setLogHook } 
     } else {
       // think in terms of time.  offset in time then convert to a pix value.
       // NOW WE'RE DOING IN PERCENT OFFSET
-      setOffset( (prev) => {
-        let s = e.deltaY * 0.1
-        console.info( 's: ' + s)
-        console.info( 'pixRatio: ' + pixRatio)
-
-        return prev + s
-      })
-      setStart( (prev) => prev + ( offset * pixRatio ))
-      setEnd( (prev) => prev + ( offset * pixRatio ))
+      setOffset( (prev) => prev + ( e.deltaY * pixRatio ) )
+      console.log('pix: ' + pixRatio )
     }
   }    
 
+    /*
   useEffect( () => {
     if ( bounds != undefined && bounds[0] != undefined ) {
       setSpan( bounds[0].timestamp - bounds[1].timestamp )
       setViewSpan(span)
-      setStart( parseInt(bounds[1].timestamp) )
-      setEnd( parseInt(bounds[0].timestamp) )
+      // despite being explicitly typed as a number, i still somehow have to cast this to a number
+      // or it somehow acts like a string and number at the same time.  great.
+      setStart( bounds[1].timestamp * 1.0 )
+      setEnd( bounds[0].timestamp * 1.0 )
+      console.log( 'start type: ' + typeof( start ) )
+      console.log( 'end type: ' + typeof( end ) )
       // set start timestamp
-      setPixRatio( width / span )
-      setMsRatio( span / width )
+      setPixRatio( (prev) => width / span )
+      setMsRatio( (prev) => span / width )
     }
     console.info('span here: ' + span )
   }, [ bounds ] )
+  */
 
   useEffect( () => {
     dispatch( fetchLogs() )
-    
+
+    // these are invalid because state updates happen async...
     setWidth( clientWidth*2 )
+    setStart( Date.now() - 2629800000 )
+    setEnd( Date.now() ) 
+    setSpan( end - start )
+    console.log( 'divide: ', width / span )
+    setPixRatio( width / span ) 
+    setMsRatio( width / span ) 
+
     document.addEventListener( 'wheel', handleWheel, true )
     return () => {
       document.removeEventListener('wheel', handleWheel)
